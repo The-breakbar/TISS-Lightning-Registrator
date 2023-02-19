@@ -30,12 +30,12 @@ else if (/groupList/.test(window.location.href)) pageType = "group";
 else if (/examDate/.test(window.location.href)) pageType = "exam";
 
 // Create object to store page info and bind main callback to message listener
-let pageInfo = {};
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a request to get page info
 	if (message.action != "getPageInfo") return;
 
-	sendResponse(pageInfo);
+	sendResponse(gatherPageInfo());
 });
 
 // Check to make sure the page is not the window handler, which is a temporary page that loads before the actual page
@@ -43,6 +43,8 @@ if (document.querySelector("#contentInner h1 span")) gatherPageInfo();
 
 // Extracts the relevant information from the page and stores it in the pageInfo object
 function gatherPageInfo() {
+	let pageInfo = {};
+
 	// All elements are wrapped in a div with the id "contentInner"
 	// LVA number from the main header
 	pageInfo.lvaNumber = document.querySelector("#contentInner h1 span").textContent.trim();
@@ -119,4 +121,6 @@ function gatherPageInfo() {
 		// Add the option info to the response
 		pageInfo.options.push(optionInfo);
 	});
+
+	return pageInfo;
 }
