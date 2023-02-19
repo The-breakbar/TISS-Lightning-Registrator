@@ -15,7 +15,8 @@
 			],
 			"js": [
 				"./content-scripts/getPageInfo.js",
-				"./content-scripts/sendRegistration.js"
+				"./content-scripts/sendRegistration.js",
+				"./content-scripts/resultHandler.js"
 			]
 		}
 	],

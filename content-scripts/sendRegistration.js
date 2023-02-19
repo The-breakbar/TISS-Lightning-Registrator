@@ -77,13 +77,14 @@ if (document.location.href.includes("dswid")) windowId = document.location.href.
 const DSRID_VALUE = 1;
 document.cookie = `dsrwid-${DSRID_VALUE}=${windowId}`;
 
-// This function "refreshes" the page with a GET request and returns a promise of the text of the response
+// This function "refreshes" the page with a GET request and returns a the document of the response
 let getPage = async () => {
 	let response = await fetch(document.location.href.replace(/dsrid=\d*/, `dsrid=${DSRID_VALUE}`));
-	return response.text();
+	let pageDocument = new DOMParser().parseFromString(await response.text(), "text/html");
+	return pageDocument;
 };
 
-// Main callback
+// This is the main callback that is run when the extension initiates the registration
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a registration request
 	if (message.action != "sendRegistration") return;
@@ -91,15 +92,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Log the time when the message was received
 	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Received registration request...");
 
-	// Setup the request loop
-	let { timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
-	let attempts = 0;
-	let success = false;
-	let errors = [];
-	let viewState;
-
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 	// If the button is not found after the stopOffset specified time, the loop will stop
+	let { timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
 		// Log the time when the loop started
@@ -110,20 +105,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			// Log that a refresh is being attempted
 			console.log("Refreshing page...");
 
-			// Refresh the page
-			let page = await getPage();
-			let pageDocument = new DOMParser().parseFromString(page, "text/html");
+			// Refresh the page and check if the button is on the page
+			let pageDocument = await getPage();
 			let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
 
-			// Find if the button is on the page
 			let button;
 			if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
 			else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
 
 			// If the button was found, extract the ViewState, stop the refresh loop and start the register loop
 			if (button) {
-				viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
-				registerLoop();
+				let viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+				registerLoop(viewState);
 				return;
 			}
 		}
@@ -131,32 +124,40 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// Log that the refresh loop timed out
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
 
-		return;
+		// Timeout is handled in resultHandler.js
+		handleRefreshTimeout();
 	}, remainingTime);
 
-	let registerLoop = async () => {
-		// Log the time when the starts being refreshed
+	// This function is called when the first valid ViewState is obtained
+	// It attempts to send the registration request until it succeeds or the maxAttempts is reached
+	// The requests are sent in series
+	let registerLoop = async (firstViewState) => {
+		// Log the time when the page starts being refreshed
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
 
+		// Request loop
+		let attempts = 0;
+		let errors = [];
+		let viewState = firstViewState;
+		let response;
 		let timeStart = Date.now();
 
-		// Request loop
-		while (attempts < maxAttempts && !success) {
+		while (attempts < maxAttempts && !response) {
 			attempts++;
 
 			// Attempt to send the requests
 			try {
-				// Get a new ViewState (except for the first attempt)
+				// View state is already valid for first request
 				if (attempts > 1) {
 					// Log the time when the starts being refreshed
 					console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing for new ViewState...");
 
-					let page = await getPage();
-					viewState = page.match(/<input type="hidden" name="javax.faces.ViewState" id=".*" value="(.*)" autocomplete="off" \/>/)[1];
+					// Refresh the page and get the ViewState
+					viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
 				}
 
-				// Returns true if the request was successful, otherwise throws an error
-				success = await sendRequest(viewState, optionId, slot);
+				// Throws an error here if the request fails
+				response = await sendRequest(viewState, optionId, slot);
 
 				// Log success
 				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration success with attempt number " + attempts);
@@ -176,26 +177,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// Log the time it took to send the requests
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + ` - Registration loop finished (${time}ms)`);
 
-		// Get the count of already registered students
-		let page = await getPage();
-		let pageDocument = new DOMParser().parseFromString(page, "text/html");
-		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
-		let numberString = Array.from(options)
-			.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
-			.querySelector(`span[id*="members"]`).innerText;
-		let number = numberString.split("/")[0].trim();
-
-		// Debug
-		if (success) console.log("Registered as number " + number);
-
-		// Send the response to the popup
-		chrome.runtime.sendMessage({
-			action: "sendRegistrationResponse",
-			success,
+		// Result is handled in resultHandler.js
+		handleResult({
+			response,
 			attempts,
 			errors,
 			time,
-			number
+			optionId
 		});
 	};
 
@@ -231,7 +219,7 @@ let getExamData = (examId) => {
 	return data;
 };
 
-// This function attempts to send the two POST requests required to register and returns true if successful
+// This function attempts to send the two POST requests required to register and returns a promise of the body of the second request
 // If any of the requests fail, it will throw an error (caused by the validateResponse function)
 let sendRequest = async (viewState, optionId, slot) => {
 	// Define the request body
@@ -269,18 +257,16 @@ let sendRequest = async (viewState, optionId, slot) => {
 	// Send the first request
 	let firstResponse = await fetch(targetUrl, payload);
 	validateResponse(firstResponse);
-	let text = await firstResponse.text();
+	let pageDocument = new DOMParser().parseFromString(await firstResponse.text(), "text/html");
 
 	// Get the new ViewState from the response and add it to the payload
-	let newViewState = text.match(/<input type="hidden" name="javax.faces.ViewState" id=".*" value="(.*)" autocomplete="off" \/>/)[1];
-	bodyData["javax.faces.ViewState"] = newViewState;
+	bodyData["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
 
 	// If the registration option has slots, get the slot id from the response and add it to the payload
 	if (slot) {
-		let optionArray = text.match(/<select id="regForm:subgrouplist".*<\/select>/)[0].split("<option");
-		let option = optionArray.find((option) => option.includes(slot[0]) && option.includes(slot[1]));
-		let value = option.match(/value="(.*)"/)[1];
-		bodyData["regForm:subgrouplist"] = value;
+		let slotOptions = pageDocument.querySelectorAll(`select[id="regForm:subgrouplist"] option`);
+		let option = Array.from(slotOptions).find((option) => option.textContent.includes(slot[0]) && option.textContent.includes(slot[1]));
+		bodyData["regForm:subgrouplist"] = option.value;
 	}
 
 	// Update the body with the new data and encode it
@@ -294,7 +280,7 @@ let sendRequest = async (viewState, optionId, slot) => {
 	validateResponse(secondResponse);
 
 	// If both requests succeed, return true
-	return true;
+	return secondResponse.text();
 };
 
 // Function to validate the responses for either a redirect or a non-ok status
