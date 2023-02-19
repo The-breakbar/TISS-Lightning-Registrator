@@ -1,0 +1,7 @@
+body {
+	width: 300px;
+}
+
+#output {
+	white-space: pre-wrap;
+}
