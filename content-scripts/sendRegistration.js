@@ -1,26 +1,21 @@
 // This is a content script responsible for executing the registration
-// The main callback, which is called with a message, sends multiple requests to TISS until one of them succeeds
-// A single request consists of 2 POST request, the first one to get the confirmation page and the second one to confirm the registration
+// The main callback, which is called with a message, sets up a refresh loop that starts some time before the registration opens
+// The page is continously refreshed until the registration opens, then it attempts to register
+// A single register request consists of 2 POST request:
+// The first one to get the confirmation page and the second one to confirm the registration
 
-// The following message format is required:
+// The following message format is required to message this script:
 // {
-// 	action: "sendRegistration"
-// 	timestamp: Timestamp of when the requests should start sending in milliseconds
-// 	startOffset: How many ms before the timestamp the refresh loop should start
+//  action: "sendRegistration"
+//  timestamp: Timestamp of when the requests should start sending in milliseconds
+//  startOffset: How many ms before the timestamp the refresh loop should start
 //  stopOffset: How many ms after the timestamp the refresh loop should stop
-// 	maxAttempts: Maximum number of attempts to send the register equest
+//  maxAttempts: Maximum number of attempts to send the register equest
 //  optionId: Id of the option, starting from the first "j_id" until the colon and number (e.g. "j_id_52:0:j_id_5d:j_id_5g:0") (only for group and exam)
 //  slot: A two string array containing the slot start and end time (e.g. ["10:00", "10:30"]) (only for exam)
 // }
 
-// The script will send a message with the following format when it is done:
-// {
-// 	action: "sendRegistrationResponse"
-// 	success: Boolean indicating if the registration was successful
-// 	attempts: Number of attempts it took to send the request
-// 	errors: Array of errors that occurred during the request loop
-// 	time: Time it took to send the requests in milliseconds
-// }
+// After the registration attempts are done, the result is processed in the resultHandler.js script
 
 // Documentation for the endpoints:
 
@@ -29,7 +24,7 @@
 
 // /education/course/courseRegistration.xhtml
 // This endpoint is used to get the confirmation page of lva registrations and requires the following POST data:
-// 	registrationForm:j_id_6t : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the register button)
+//  registrationForm:j_id_6t : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the register button)
 //  registrationForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
@@ -41,7 +36,7 @@
 //  groupContentForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState obtained from the response to the previous request (see below)
+//  javax.faces.ViewState : A valid ViewState (see below)
 
 // /education/course/examDateList.xhtml
 // This endpoint is used to get the confirmation page of exam registrations and requires the following POST data:
@@ -49,7 +44,7 @@
 //  examDateListForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState obtained from the response to the previous request (see below)
+//  javax.faces.ViewState : A valid ViewState (see below)
 
 // /education/course/register.xhtml
 // This endpoint is used to confirm the registration, has to be called after one of the lva/group/exam endpoints was called
@@ -149,14 +144,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			try {
 				// View state is already valid for first request
 				if (attempts > 1) {
-					// Log the time when the starts being refreshed
+					// Log the time
 					console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing for new ViewState...");
 
 					// Refresh the page and get the ViewState
 					viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
 				}
 
-				// Throws an error here if the request fails
+				// Throws an error here if the request fails in any way
 				response = await sendRequest(viewState, optionId, slot);
 
 				// Log success
@@ -279,20 +274,20 @@ let sendRequest = async (viewState, optionId, slot) => {
 	let secondResponse = await fetch(CONFIRM_ENDPOINT, payload);
 	validateResponse(secondResponse);
 
-	// If both requests succeed, return true
+	// If both requests succeed, return the body of the second request
 	return secondResponse.text();
 };
 
 // Function to validate the responses for either a redirect or a non-ok status
 let validateResponse = (response) => {
 	// Check if the response is a redirect, mostly redirects to a 404 or "Invalid session" page
-	// Caused by an invalid request (usually the ViewState is invalid)
+	// Caused by an invalid request or because the action can not be performed
 	if (response.redirected) {
 		let errorCode = response.url.match(/errorCode=(.*)/)[1];
 		throw new Error(`Response failed, redirected to ${errorCode} error page.`);
 	}
 
-	// Check if the response is not ok, generally happens if something is very wrong with the request
+	// Check if the response is not ok, generally happens if the cookies or ViewState are invalid
 	// (usually it is a 302, but a 500 has also been observed)
 	if (!response.ok) {
 		throw new Error(`Response failed with status ${response.status}.`);
