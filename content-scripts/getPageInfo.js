@@ -30,7 +30,6 @@ else if (/groupList/.test(window.location.href)) pageType = "group";
 else if (/examDate/.test(window.location.href)) pageType = "exam";
 
 // Create object to store page info and bind main callback to message listener
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a request to get page info
 	if (message.action != "getPageInfo") return;
