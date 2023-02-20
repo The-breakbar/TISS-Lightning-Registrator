@@ -1,7 +1,7 @@
 // This is a content script responsible for extracting the relevant information from the registration pages
 // The following message format is required:
 // {
-// 	action: "getPageInfo"
+//  action: "getPageInfo"
 // }
 
 // The response will return the following values (some values may be undefined, depending on the page type):
