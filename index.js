@@ -1,5 +1,5 @@
 // If tab is on an appropriate TISS page, message getPageInfo.js content script in page to retrieve all the registration info
-chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	// Check if tab has content script injected
 	const tabUrl = tabs[0].url;
 	if (!/https:\/\/.*tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
@@ -13,15 +13,15 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 
 	let startTime;
 	// Bind register callback
-	document.getElementById("register-button").addEventListener("click", () => {
+	document.getElementById("register-button").addEventListener("click", async () => {
 		startTime = Date.now();
-		let targetDateString, optionId, slot;
+		let targetDateString, optionId, slot, optionInfo;
 		if (registrationTask == "lva") {
-			let optionInfo = pageInfo.options[0];
+			optionInfo = pageInfo.options[0];
 			targetDateString = optionInfo.start;
 		} else {
 			optionId = document.getElementById("idselect").value;
-			let optionInfo = pageInfo.options.find((option) => option.id == optionId);
+			optionInfo = pageInfo.options.find((option) => option.id == optionId);
 			targetDateString = optionInfo.start;
 			if (optionInfo.slots) {
 				slot = document.getElementById("slotselect").value.split(",");
@@ -35,6 +35,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 
 		let message = {
 			action: "sendRegistration",
+			tabId: tabs[0].id,
 			timestamp: targetTime,
 			startOffset: 10000,
 			stopOffset: 20000,
@@ -43,7 +44,21 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			slot
 		};
 		chrome.tabs.sendMessage(tabs[0].id, message);
-		document.getElementById("debug").textContent = `Registration started... (${Math.round(timeRemaining / 1000)}s remaining)`;
+		document.getElementById("output").textContent = `Registration started... (${Math.round(timeRemaining / 1000)}s remaining)`;
+
+		// Store the active registration task
+		let tasks = (await chrome.storage.local.get("tasks")).tasks ?? [];
+		tasks.push({
+			tabId: tabs[0].id,
+			status: "queued",
+			lva: pageInfo.lvaName,
+			name: optionInfo.name,
+			target: targetTime,
+			expiry: targetTime + 30000,
+			time: undefined,
+			number: undefined
+		});
+		chrome.storage.local.set({ tasks });
 	});
 
 	// Bind response callback
@@ -51,14 +66,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		if (message.action != "sendRegistrationResponse") return;
 		let { success, attempts, errors, time, number } = message;
 		if (success) {
-			document.getElementById("debug").textContent = `Registration successful with ${attempts} attempt${attempts == 1 ? "" : "s"} (place ${number}) (${time}ms)`;
+			document.getElementById("output").textContent = `Registration successful with ${attempts} attempt${attempts == 1 ? "" : "s"} (place ${number}) (${time}ms)`;
 		} else {
-			document.getElementById("debug").textContent = `Registration failed: Max attempts reached (${time}ms)`;
+			document.getElementById("output").textContent = `Registration failed: Max attempts reached (${time}ms)`;
 		}
 
 		if (errors.length > 0) {
 			errors.forEach((errorMessage) => {
-				document.getElementById("debug").textContent += `\n${errorMessage}`;
+				document.getElementById("output").textContent += `\n${errorMessage}`;
 			});
 		}
 
@@ -69,7 +84,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 	// Get page info on popup load
 	chrome.tabs.sendMessage(tabs[0].id, { action: "getPageInfo" }).then((response) => {
 		pageInfo = response;
-		document.getElementById("output").textContent = JSON.stringify(response, null, 2);
+		document.getElementById("page-info").textContent = JSON.stringify(response, null, 2);
 
 		// Add select options
 		// Add options to select element
@@ -78,6 +93,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 			let opt = document.createElement("option");
 			opt.value = option.id;
 			opt.textContent = option.name;
+			if (registrationTask == "exam") opt.textContent += ` (${option.date})`;
 			select.appendChild(opt);
 		});
 
@@ -102,5 +118,21 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 				slotSelect.appendChild(opt);
 			});
 		}
+	});
+
+	// Bind callback for clearing button
+	document.getElementById("clear-storage").addEventListener("click", () => {
+		chrome.storage.local.clear();
+	});
+
+	// Remove expired registration tasks
+	let tasks = (await chrome.storage.local.get("tasks")).tasks ?? [];
+	tasks = tasks.filter((registration) => registration.expiry > Date.now());
+	chrome.storage.local.set({ tasks });
+
+	// Show registration tasks
+	let taskOutput = document.getElementById("tasks");
+	tasks.forEach((task) => {
+		taskOutput.textContent += `${task.lva}\n${task.name} (${Math.round((task.target - Date.now()) / 1000)}s)\n`;
 	});
 });

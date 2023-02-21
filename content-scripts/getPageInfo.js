@@ -5,9 +5,9 @@
 // }
 
 // The response will return the following values (some values may be undefined, depending on the page type):
-// number : LVA number
-// name : LVA name
-// semester : LVA Semester
+// lvaNumber : LVA number
+// lvaName : LVA name
+// lvaSemester : LVA Semester
 // options[] : All available LVA/group/exam registration options (array)
 //   option.name : Name of registration option
 //   option.date : Date of option (only for exams)

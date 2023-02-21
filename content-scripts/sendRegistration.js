@@ -7,6 +7,7 @@
 // The following message format is required to message this script:
 // {
 //  action: "sendRegistration"
+//  tabId: Id of the tab which is messaged
 //  timestamp: Timestamp of when the requests should start sending in milliseconds
 //  startOffset: How many ms before the timestamp the refresh loop should start
 //  stopOffset: How many ms after the timestamp the refresh loop should stop
@@ -89,9 +90,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 	// If the button is not found after the stopOffset specified time, the loop will stop
-	let { timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
+	let { tabId, timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
+		// Update the status of the registration task
+		// TODO: Fix bug if not in local storage
+		chrome.storage.local.get("tasks").then(({ tasks }) => {
+			tasks.find((task) => task.tabId == tabId).status = "active";
+			chrome.storage.local.set({ tasks });
+		});
+
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
 
@@ -175,6 +183,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		// Result is handled in resultHandler.js
 		handleResult({
 			response,
+			tabId,
 			attempts,
 			errors,
 			time,
