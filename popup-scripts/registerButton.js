@@ -23,9 +23,9 @@ document.getElementById("register-button").addEventListener("click", async () =>
 		action: "sendRegistration",
 		tabId,
 		timestamp: targetTime,
-		startOffset: 10000,
+		startOffset: 30000,
 		stopOffset: 20000,
-		maxAttempts: 7,
+		maxAttempts: 5,
 		optionId,
 		slot
 	};
