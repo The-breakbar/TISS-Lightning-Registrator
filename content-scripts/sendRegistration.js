@@ -94,9 +94,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
 		// Update the status of the registration task
-		// TODO: Fix bug if not in local storage
-		chrome.storage.local.get("tasks").then(({ tasks }) => {
-			tasks.find((task) => task.tabId == tabId).status = "active";
+		chrome.storage.local.get("tasks").then(async ({ tasks }) => {
+			let task = tasks.find((task) => task.tabId == tabId);
+			if (!task) return;
+
+			task.status = "active";
 			chrome.storage.local.set({ tasks });
 		});
 
