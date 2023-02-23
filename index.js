@@ -37,4 +37,4 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	});
 });
 
-showTasks();
+showTaskElements();
