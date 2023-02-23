@@ -33,18 +33,18 @@ document.getElementById("register-button").addEventListener("click", async () =>
 	document.getElementById("output").textContent = `Registration started... (${Math.round(timeRemaining / 1000)}s remaining)`;
 
 	// Store the active registration task
-	let tasks = (await chrome.storage.local.get("tasks")).tasks ?? [];
-	tasks.push({
+	let task = {
 		tabId,
 		status: "queued",
+		created: Date.now(),
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
 		target: targetTime,
-		expiry: targetTime + 30000,
+		expiry: Math.max(Date.now(), targetTime) + 30000,
 		time: undefined,
 		number: undefined
-	});
-	chrome.storage.local.set({ tasks });
+	};
+	chrome.runtime.sendMessage({ action: "addRegistrationTask", task });
 });
 
 // Bind response callback

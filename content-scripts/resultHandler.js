@@ -23,24 +23,22 @@ let handleResult = async (message) => {
 	if (response) {
 		console.log("Registered as number " + number);
 
-		// Update the registration task
-		chrome.storage.local.get("tasks").then(({ tasks }) => {
-			let task = tasks.find((task) => task.tabId == tabId);
-			task.status = "success";
-			task.number = number;
-			task.time = time;
-			chrome.storage.local.set({ tasks });
-		});
+		let task = {
+			tabId,
+			status: "success",
+			number,
+			time
+		};
+		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
 	} else {
 		console.log("Registration failed");
 
-		// Update the registration task
-		chrome.storage.local.get("tasks").then(({ tasks }) => {
-			let task = tasks.find((task) => task.tabId == tabId);
-			task.status = "failed";
-			task.time = time;
-			chrome.storage.local.set({ tasks });
-		});
+		let task = {
+			tabId,
+			status: "failed",
+			time
+		};
+		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
 	}
 
 	// Send the response to the popup

@@ -94,13 +94,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
 		// Update the status of the registration task
-		chrome.storage.local.get("tasks").then(async ({ tasks }) => {
-			let task = tasks.find((task) => task.tabId == tabId);
-			if (!task) return;
-
-			task.status = "active";
-			chrome.storage.local.set({ tasks });
-		});
+		let task = { tabId, status: "active" };
+		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
 
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
