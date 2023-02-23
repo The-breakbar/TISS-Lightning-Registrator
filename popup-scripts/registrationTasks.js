@@ -15,7 +15,8 @@ let showTasks = async () => {
 	taskOutput.textContent = "";
 
 	let tasks = await chrome.storage.session.get(null);
-	Object.values(tasks).forEach((task) => {
+	let taskList = Object.values(tasks).sort((a, b) => a.created - b.created);
+	Object.values(taskList).forEach((task) => {
 		// Remove if expired
 		if (task.expiry < Date.now()) {
 			chrome.storage.session.remove(task.tabId.toString());

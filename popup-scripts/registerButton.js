@@ -37,13 +37,13 @@ document.getElementById("register-button").addEventListener("click", async () =>
 	let task = {
 		tabId,
 		status: "queued",
+		created: Date.now(),
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
 		target: targetTime,
 		expiry: Math.max(Date.now(), targetTime) + 30000
 	};
-	await chrome.storage.session.set({ [tabId.toString()]: task });
-	showTasks();
+	chrome.storage.session.set({ [tabId.toString()]: task });
 });
 
 // Bind response callback
