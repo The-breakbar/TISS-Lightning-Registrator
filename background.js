@@ -1,27 +1,12 @@
-// Task:
-// {
-//  tabId : Id of the tab that the registration is running in
-//  status : Status of the registration (queued, running, success, failed)
-//  lva : Name of the LVA
-//  name : Name of the registration option
-//  target : Time when the registration opens
-//  expiry : Time when the registration task expires, incase any errors occur
-//  number : The place number of the registration
-//  time : How long the registration took
-// }
-
+// Set access level to allow content scripts to access session storage
 chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS" });
 
+// Remove tasks if their tab is closed or updated
+// Success and failed tasks don't need to be removed, as they are already finished and will expire
 let removeTask = async (tabId) => {
-	let tasks = (await chrome.storage.session.get("tasks")).tasks || [];
-	tasks = tasks.filter((task) => task.tabId != tabId);
-	chrome.storage.session.set({ tasks });
+	let task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+	if (task?.status == "success" || task?.status == "failed") return;
+	chrome.storage.session.remove(tabId.toString());
 };
-
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-	removeTask(tabId);
-});
-
-chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-	removeTask(tabId);
-});
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => removeTask(tabId));
+chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => removeTask(tabId));

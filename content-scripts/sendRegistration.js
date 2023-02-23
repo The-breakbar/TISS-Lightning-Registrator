@@ -94,15 +94,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
 		// Update the status of the registration task
+		// TODO: Move elsewhere
 		let updateTask = async () => {
-			let task, tasks;
+			let task;
 			while (!task) {
-				tasks = (await chrome.storage.session.get("tasks")).tasks || [];
-				task = tasks.find((task) => task.tabId == tabId);
+				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
 			}
 			if (task.status == "queued") {
 				task.status = "running";
-				chrome.storage.session.set({ tasks });
+				chrome.storage.session.set({ [tabId]: task });
 			}
 		};
 		updateTask();
