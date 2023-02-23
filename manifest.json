@@ -20,10 +20,8 @@
 			]
 		}
 	],
-	"background": {
-		"service_worker": "./background.js"
-	},
 	"permissions": [
-		"tabs"
+		"tabs",
+		"storage"
 	]
 }

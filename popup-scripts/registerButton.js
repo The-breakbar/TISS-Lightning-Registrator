@@ -5,10 +5,10 @@ document.getElementById("register-button").addEventListener("click", async () =>
 	if (pageType == "lva") {
 		optionInfo = pageInfo.options[0];
 	} else {
-		optionId = document.getElementById("idselect").value;
+		optionId = document.getElementById("option-select").value;
 		optionInfo = pageInfo.options.find((option) => option.id == optionId);
 		if (optionInfo.slots) {
-			slot = document.getElementById("slotselect").value.split(",");
+			slot = document.getElementById("slot-select").value.split(",");
 		}
 	}
 
@@ -44,7 +44,9 @@ document.getElementById("register-button").addEventListener("click", async () =>
 		target: targetTime,
 		expiry: Math.max(Date.now(), targetTime) + 30000
 	};
-	chrome.runtime.sendMessage({ action: "addRegistrationTask", task });
+	let tasks = (await chrome.storage.local.get("tasks")).tasks || [];
+	tasks.unshift(task);
+	chrome.storage.local.set({ tasks });
 });
 
 // Bind response callback

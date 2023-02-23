@@ -1,26 +1,45 @@
+// Global variables used for popup
 let pageInfo;
 let pageType;
 let tabId;
 
-// If tab is on an appropriate TISS page, message getPageInfo.js content script in page to retrieve all the registration info
+// Check if tab is a registration page
 chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-	// Check if tab has content script injected
-	const tabUrl = tabs[0].url;
+	tabId = tabs[0].id;
+	let tabUrl = tabs[0].url;
 	if (!/https:\/\/.*tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
 
 	// Determine type of registration
 	if (/courseRegistration/.test(tabUrl)) pageType = "lva";
 	else if (/groupList/.test(tabUrl)) pageType = "group";
 	else if (/examDate/.test(tabUrl)) pageType = "exam";
-	if (!pageType) return;
 
-	tabId = tabs[0].id;
+	// Get the page info from the content script
+	// This is necessary because the popup can be opened before the content script has loaded
+	while (!pageInfo) {
+		// Catch empty because it just means the tab hasn't loaded yet
+		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
+	}
 
-	// Get page info on popup load
-	chrome.tabs.sendMessage(tabs[0].id, { action: "getPageInfo" }).then((response) => {
-		pageInfo = response;
-		document.getElementById("page-info").textContent = JSON.stringify(response, null, 2);
+	// Show page info
+	document.getElementById("page-info").textContent = JSON.stringify(pageInfo, null, 2);
 
-		updateOptions();
+	// Update the option select
+	let select = document.getElementById("option-select");
+	pageInfo.options.forEach((option) => {
+		// Create option element
+		let optElement = document.createElement("option");
+		optElement.value = option.id;
+		optElement.textContent = option.name;
+
+		// Add the date for exam options to be able to distinguish them
+		if (pageType == "exam") optElement.textContent += ` (${option.date})`;
+
+		// Add the option to the select
+		select.appendChild(optElement);
 	});
+});
+
+document.getElementById("storage-clear").addEventListener("click", () => {
+	chrome.storage.local.clear();
 });

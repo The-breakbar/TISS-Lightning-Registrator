@@ -1,4 +1,6 @@
-chrome.runtime.sendMessage({ action: "getRegistrationTasks" }).then((tasks) => {
+chrome.storage.local.get("tasks").then(({ tasks }) => {
+	if (!tasks) return;
+
 	// Show registration tasks
 	let taskOutput = document.getElementById("tasks");
 	tasks.forEach((task) => {

@@ -23,22 +23,45 @@ let handleResult = async (message) => {
 	if (response) {
 		console.log("Registered as number " + number);
 
-		let task = {
-			tabId,
+		let update = {
 			status: "success",
+			expiry: Date.now() + 30000,
 			number,
 			time
 		};
-		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
+		let updateTask = async () => {
+			let task, tasks;
+			while (!task) {
+				tasks = (await chrome.storage.local.get("tasks")).tasks || [];
+				task = tasks.find((task) => task.tabId == tabId);
+			}
+			if (task.status == "queued" || task.status == "running") {
+				task = Object.assign(task, update);
+				chrome.storage.local.set({ tasks });
+			}
+		};
+		updateTask();
 	} else {
 		console.log("Registration failed");
 
-		let task = {
+		let update = {
 			tabId,
 			status: "failed",
+			expiry: Date.now() + 30000,
 			time
 		};
-		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
+		let updateTask = async () => {
+			let task, tasks;
+			while (!task) {
+				tasks = (await chrome.storage.local.get("tasks")).tasks || [];
+				task = tasks.find((task) => task.tabId == tabId);
+			}
+			if (task.status == "queued" || task.status == "running") {
+				task = Object.assign(task, update);
+				chrome.storage.local.set({ tasks });
+			}
+		};
+		updateTask();
 	}
 
 	// Send the response to the popup
