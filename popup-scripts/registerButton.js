@@ -33,8 +33,6 @@ document.getElementById("register-button").addEventListener("click", async () =>
 	};
 	chrome.tabs.sendMessage(tabId, message);
 
-	document.getElementById("output").textContent = `Registration started... (${Math.round(timeRemaining / 1000)}s remaining)`;
-
 	// Store the active registration task
 	let task = {
 		tabId,

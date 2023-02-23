@@ -1,14 +1,5 @@
 // This is a content script responsible for handling the results of the registration attempts
 
-// The script will send a message with the following format when it is done:
-// {
-//  action: "sendRegistrationResponse"
-//  success: Boolean indicating if the registration was successful
-//  attempts: Number of attempts it took to send the request
-//  errors: Array of errors that occurred during the request loop
-//  time: Time it took to send the requests in milliseconds
-// }
-
 let handleResult = async (message) => {
 	let { response, tabId, attempts, errors, time, optionId } = message;
 
@@ -61,16 +52,6 @@ let handleResult = async (message) => {
 		};
 		updateTask();
 	}
-
-	// Send the response to the popup
-	chrome.runtime.sendMessage({
-		action: "sendRegistrationResponse",
-		success: !!response,
-		attempts,
-		errors,
-		time,
-		number
-	});
 };
 
 let handleRefreshTimeout = async () => {};

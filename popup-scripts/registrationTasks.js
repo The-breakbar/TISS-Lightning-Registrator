@@ -10,14 +10,19 @@
 //  time : How long the registration took
 // }
 
-let showTasks = () => {
+let showTasks = async () => {
 	let taskOutput = document.getElementById("tasks");
 	taskOutput.textContent = "";
 
-	chrome.storage.session.get(null).then((tasks) => {
-		Object.values(tasks).forEach((task) => {
-			taskOutput.textContent += `[${task.status}] ${task.lva}\n${task.name} (${Math.round((task.target - Date.now()) / 1000)}s)\n`;
-		});
+	let tasks = await chrome.storage.session.get(null);
+	Object.values(tasks).forEach((task) => {
+		// Remove if expired
+		if (task.expiry < Date.now()) {
+			chrome.storage.session.remove(task.tabId.toString());
+			return;
+		}
+
+		taskOutput.textContent += `[${task.status}] ${task.lva}\n${task.name} (${Math.round((task.target - Date.now()) / 1000)}s)\n`;
 	});
 };
 

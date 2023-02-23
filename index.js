@@ -21,9 +21,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
 	}
 
-	// Show page info
-	document.getElementById("page-info").textContent = JSON.stringify(pageInfo, null, 2);
-
 	// Update the option select
 	let select = document.getElementById("option-select");
 	pageInfo.options.forEach((option) => {
