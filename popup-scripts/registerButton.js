@@ -1,24 +1,26 @@
 // Bind register callback
 document.getElementById("register-button").addEventListener("click", async () => {
-	let startTime = Date.now();
-	let targetDateString, optionId, slot, optionInfo;
+	// Get the info of the selected option
+	let optionInfo, optionId, slot;
 	if (pageType == "lva") {
 		optionInfo = pageInfo.options[0];
-		targetDateString = optionInfo.start;
 	} else {
 		optionId = document.getElementById("idselect").value;
 		optionInfo = pageInfo.options.find((option) => option.id == optionId);
-		targetDateString = optionInfo.start;
 		if (optionInfo.slots) {
 			slot = document.getElementById("slotselect").value.split(",");
 		}
 	}
+
+	// Get the target time
+	let targetDateString = optionInfo.start;
 	let [date, time] = targetDateString.split(", ");
 	let [day, month, year] = date.split(".");
 	let [hour, minute] = time.split(":");
 	let targetTime = new Date(year, month - 1, day, hour, minute).getTime();
 	let timeRemaining = Math.max(0, targetTime - Date.now());
 
+	// Send the registration request to the content script
 	let message = {
 		action: "sendRegistration",
 		tabId,
@@ -30,19 +32,17 @@ document.getElementById("register-button").addEventListener("click", async () =>
 		slot
 	};
 	chrome.tabs.sendMessage(tabId, message);
+
 	document.getElementById("output").textContent = `Registration started... (${Math.round(timeRemaining / 1000)}s remaining)`;
 
 	// Store the active registration task
 	let task = {
 		tabId,
 		status: "queued",
-		created: Date.now(),
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
 		target: targetTime,
-		expiry: Math.max(Date.now(), targetTime) + 30000,
-		time: undefined,
-		number: undefined
+		expiry: Math.max(Date.now(), targetTime) + 30000
 	};
 	chrome.runtime.sendMessage({ action: "addRegistrationTask", task });
 });

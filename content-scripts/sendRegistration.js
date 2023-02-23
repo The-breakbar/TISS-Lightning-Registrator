@@ -94,7 +94,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
 		// Update the status of the registration task
-		let task = { tabId, status: "active" };
+		let task = { tabId, status: "running" };
 		chrome.runtime.sendMessage({ action: "updateRegistrationTask", task });
 
 		// Log the time when the loop started
