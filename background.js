@@ -9,3 +9,19 @@
 //  number : The place number of the registration
 //  time : How long the registration took
 // }
+
+chrome.storage.session.setAccessLevel({ accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS" });
+
+let removeTask = async (tabId) => {
+	let tasks = (await chrome.storage.session.get("tasks")).tasks || [];
+	tasks = tasks.filter((task) => task.tabId != tabId);
+	chrome.storage.session.set({ tasks });
+};
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+	removeTask(tabId);
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+	removeTask(tabId);
+});

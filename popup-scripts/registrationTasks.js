@@ -1,4 +1,4 @@
-chrome.storage.local.get("tasks").then(({ tasks }) => {
+chrome.storage.session.get("tasks").then(({ tasks }) => {
 	if (!tasks) return;
 
 	// Show registration tasks

@@ -97,12 +97,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		let updateTask = async () => {
 			let task, tasks;
 			while (!task) {
-				tasks = (await chrome.storage.local.get("tasks")).tasks || [];
+				tasks = (await chrome.storage.session.get("tasks")).tasks || [];
 				task = tasks.find((task) => task.tabId == tabId);
 			}
 			if (task.status == "queued") {
 				task.status = "running";
-				chrome.storage.local.set({ tasks });
+				chrome.storage.session.set({ tasks });
 			}
 		};
 		updateTask();

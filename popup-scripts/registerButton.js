@@ -44,9 +44,9 @@ document.getElementById("register-button").addEventListener("click", async () =>
 		target: targetTime,
 		expiry: Math.max(Date.now(), targetTime) + 30000
 	};
-	let tasks = (await chrome.storage.local.get("tasks")).tasks || [];
+	let tasks = (await chrome.storage.session.get("tasks")).tasks || [];
 	tasks.unshift(task);
-	chrome.storage.local.set({ tasks });
+	chrome.storage.session.set({ tasks });
 });
 
 // Bind response callback

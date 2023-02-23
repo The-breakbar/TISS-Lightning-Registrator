@@ -41,5 +41,5 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 });
 
 document.getElementById("storage-clear").addEventListener("click", () => {
-	chrome.storage.local.clear();
+	chrome.storage.session.clear();
 });
