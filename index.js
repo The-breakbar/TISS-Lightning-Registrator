@@ -37,4 +37,5 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	});
 });
 
+// Registration tasks are handled in registrationTasks.js
 initTaskRemovalTimeouts();

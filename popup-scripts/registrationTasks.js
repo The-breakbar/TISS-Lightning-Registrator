@@ -1,5 +1,6 @@
+// This file handles the display of registration tasks and the removal of expired tasks
 // Registration tasks are an internal representation of a registration attempt
-// They are not connected with the registration attempt, they only show the latest status of the registration (and thus can be inaccurate)
+// They are not connected with the registration attempt, they only show the latest status update of the attempt
 // They are stored in the session storage and are removed when they expire
 
 // A task is stored with the following structure:
@@ -16,7 +17,7 @@
 
 let activeTimeouts = {};
 
-// Called when the popup is opened, removes expired tasks and sets up timeouts for the remaining tasks
+// When the popup is opened, remove expired tasks and set up timeouts for the remaining tasks
 // The timeouts will remove the tasks from the session storage when they expire
 // This will cause the popup to update and remove the task from the list
 let initTaskRemovalTimeouts = async () => {
@@ -60,18 +61,21 @@ let showTaskElements = async () => {
 chrome.storage.onChanged.addListener((changes, area) => {
 	if (area == "session") showTaskElements();
 
+	// Check what kind of change was made to each task
 	Object.keys(changes).forEach((key) => {
 		// If a task was removed, clear the timeout
 		if (changes[key].newValue == undefined) {
 			clearTimeout(activeTimeouts[key]);
 			delete activeTimeouts[key];
 		}
+
 		// If a task was added, set the timeout
 		else if (changes[key].oldValue == undefined) {
 			activeTimeouts[key] = setTimeout(() => {
 				chrome.storage.session.remove(key);
 			}, changes[key].newValue.expiry - Date.now());
 		}
+
 		// If the expiry of a task was updated, clear the old timeout and set a new one
 		else if (changes[key].newValue.expiry != changes[key].oldValue.expiry) {
 			clearTimeout(activeTimeouts[key]);
