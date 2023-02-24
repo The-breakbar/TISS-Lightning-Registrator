@@ -41,7 +41,10 @@ let showTaskElements = async () => {
 	let taskList = Object.values(tasks).sort((a, b) => a.created - b.created);
 
 	taskList.forEach((task) => {
-		taskOutput.textContent += `[${task.status}] ${task.lva}\n${task.name} (${Math.round((task.target - Date.now()) / 1000)}s)\n`;
+		let firstLine = `[${task.status}] ${task.lva}`;
+		let taskInfo = task.status == "success" ? `(${task.time}ms) (place ${task.number})` : `(${Math.max(0, Math.round((task.target - Date.now()) / 1000))}s remaining)`;
+		let secondLine = `${task.name} ${taskInfo}`;
+		taskOutput.textContent += `${firstLine}\n${secondLine}\n`;
 	});
 };
 
