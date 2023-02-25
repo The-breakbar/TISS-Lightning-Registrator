@@ -29,6 +29,25 @@ if (/courseRegistration/.test(window.location.href)) pageType = "lva";
 else if (/groupList/.test(window.location.href)) pageType = "group";
 else if (/examDate/.test(window.location.href)) pageType = "exam";
 
+// Remove click event listeners of the exam expand button and replace it with an alert
+// Expanding the exam list will change the ids of the exam options, which will make any ongoing registrations fail
+let expandElement = document.getElementById("examDateListForm:loadAllExamsLink");
+if (expandElement) {
+	let expandElement = document.getElementById("examDateListForm:loadAllExamsLink");
+	expandElement.removeAttribute("onclick");
+	let expandElementClone = expandElement.cloneNode(true);
+	expandElement.parentNode.replaceChild(expandElementClone, expandElement);
+
+	// Add new click event listener
+	expandElementClone.onclick = () => {
+		alert(
+			`[TISS Lightning Registrator Extension]\n\n` +
+				`The extension has disabled the functionality of the expand button. It can lead to unexpected behaviour if it is clicked while a registration is ongoing.\n\n` +
+				`If you want to expand the list, please temporarily disable the extension and reload the page. After you are done, you can re-enable the extension.`
+		);
+	};
+}
+
 // Create object to store page info and bind main callback to message listener
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a request to get page info
@@ -37,11 +56,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	sendResponse(gatherPageInfo());
 });
 
-// Check to make sure the page is not the window handler, which is a temporary page that loads before the actual page
-if (document.querySelector("#contentInner h1 span")) gatherPageInfo();
-
 // Extracts the relevant information from the page and stores it in the pageInfo object
-function gatherPageInfo() {
+let gatherPageInfo = () => {
 	let pageInfo = {};
 
 	// All elements are wrapped in a div with the id "contentInner"
@@ -122,4 +138,4 @@ function gatherPageInfo() {
 	});
 
 	return pageInfo;
-}
+};
