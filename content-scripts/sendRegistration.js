@@ -3,6 +3,7 @@
 // The page is continously refreshed until the registration opens, then it attempts to register
 // A single register request consists of 2 POST request:
 // The first one to get the confirmation page and the second one to confirm the registration
+// If the registration attempt is not the first one, it will also do a refresh (GET) before sending the two requests
 
 // The following message format is required to message this script:
 // {
@@ -10,8 +11,8 @@
 //  tabId: Id of the tab which is messaged
 //  timestamp: Timestamp of when the requests should start sending in milliseconds
 //  startOffset: How many ms before the timestamp the refresh loop should start
-//  stopOffset: How many ms after the timestamp the refresh loop should stop
-//  maxAttempts: Maximum number of attempts to send the register equest
+//  stopOffset: How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
+//  maxAttempts: Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
 //  optionId: Id of the option, starting from the first "j_id" until the colon and number (e.g. "j_id_52:0:j_id_5d:j_id_5g:0") (only for group and exam)
 //  slot: A two string array containing the slot start and end time (e.g. ["10:00", "10:30"]) (only for exam)
 // }
@@ -21,7 +22,7 @@
 // Documentation for the endpoints:
 
 // Every request has to have these 3 session cookies: _tiss_session, TISS_AUTH, JSESSIONID
-// The cookies generally do not change during the session, except for JSESSIONID, which can change if bad requests are sent
+// The cookies generally do not change during the session, except for JSESSIONID, which has been observed to change when bad requests were sent
 
 // /education/course/courseRegistration.xhtml
 // This endpoint is used to get the confirmation page of lva registrations and requires the following POST data:
@@ -47,6 +48,11 @@
 //  javax.faces.ClientWindow : Same value as dspwid
 //  javax.faces.ViewState : A valid ViewState (see below)
 
+// All of the above endpoints return the a body containing the confirmation page
+// Note that a 200 doesn't mean the first request was successful, as it can also be a redirect to a TISS error page
+// The confirmation page may contain the slot selection options for exams with slots
+// The ViewState that is found in the response has to be used for the confirmation request
+
 // /education/course/register.xhtml
 // This endpoint is used to confirm the registration, has to be called after one of the lva/group/exam endpoints was called
 // It requires the following POST data:
@@ -55,7 +61,7 @@
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
 //  javax.faces.ViewState : A valid ViewState obtained from the response to the previous request (see below)
-//  regForm:subgrouplist : Number value of the exam slot selection option (has to be extracted from the response to the previous request) (only for exams with slots)
+//  regForm:subgrouplist : Number value of the exam slot selection html option (has to be extracted from the response to the previous request) (only for exams with slots)
 
 // ViewState (represents the state of the page)
 // The ViewState is a unique string that is required for every request and changes every time the page is loaded
@@ -67,13 +73,15 @@
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
 // The dsrid value can be any 3-digit number, but the ClientWindow id has to be the same as the one in the url
-// (note that the cookie name is dsrwid, not dsrid as in the url)
+// The cookie is set with a fixed value, to avoid creating an unnecessary amount of cookies
+// (note that the cookie name is "dsrwid", not "dsrid" as in the url)
 let windowId;
 if (document.location.href.includes("dswid")) windowId = document.location.href.match(/dswid=(\d*)/)[1]; // The window handler page may not have the id
 const DSRID_VALUE = 1;
 document.cookie = `dsrwid-${DSRID_VALUE}=${windowId}`;
 
 // This function "refreshes" the page with a GET request and returns a the document of the response
+// The url is modified to include the dsrid value that was set in the cookie
 let getPage = async () => {
 	let response = await fetch(document.location.href.replace(/dsrid=\d*/, `dsrid=${DSRID_VALUE}`));
 	let pageDocument = new DOMParser().parseFromString(await response.text(), "text/html");
@@ -88,25 +96,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Log the time when the message was received
 	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Received registration request...");
 
+	// Set a timeout that will run "startOffset" milliseconds before the registration opens
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 	// If the button is not found after the stopOffset specified time, the loop will stop
 	let { tabId, timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
 	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
 	setTimeout(async () => {
-		// Update the status of the registration task
-		// TODO: Move elsewhere
-		let updateTask = async () => {
-			let task;
-			while (!task) {
-				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
-			}
-			if (task.status == "queued") {
-				task.status = "running";
-				chrome.storage.session.set({ [tabId]: task });
-			}
-		};
-		updateTask();
-
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
 
@@ -144,6 +139,20 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let registerLoop = async (firstViewState) => {
 		// Log the time when the page starts being refreshed
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
+
+		// Update the status of the registration task
+		// TODO: Move elsewhere
+		let updateTask = async () => {
+			let task;
+			while (!task) {
+				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+			}
+			if (task.status == "queued") {
+				task.status = "running";
+				chrome.storage.session.set({ [tabId]: task });
+			}
+		};
+		updateTask();
 
 		// Request loop
 		let attempts = 0;
