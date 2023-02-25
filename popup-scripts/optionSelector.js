@@ -17,7 +17,7 @@ let initOptionSelector = () => {
 	pageInfo.options.forEach((option) => {
 		// Create option element
 		let optElement = document.createElement("option");
-		optElement.value = option.id;
+		optElement.value = option.id; // Option value is just the id
 		optElement.textContent = option.name;
 
 		// Add the date for exam options to be able to distinguish them
@@ -55,7 +55,7 @@ document.getElementById("option-select").addEventListener("change", (event) => {
 		// Add the slots to the select
 		optionInfo.slots.forEach((slot) => {
 			let slotOption = document.createElement("option");
-			slotOption.value = slot.start + "," + slot.end;
+			slotOption.value = slot.start + "," + slot.end; // Option value is start and end time separated by a comma
 			slotOption.textContent = slot.start + " - " + slot.end;
 			slotSelect.appendChild(slotOption);
 		});
