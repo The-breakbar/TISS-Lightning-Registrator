@@ -59,7 +59,10 @@ let showTaskElements = async () => {
 // Bind storage update callback which will be triggered every time a task is added/updated/removed
 // Redraws the task elements and updates the removal timeouts
 chrome.storage.onChanged.addListener((changes, area) => {
-	if (area == "session") showTaskElements();
+	if (area != "session") return;
+
+	// Redraw the task elements
+	showTaskElements();
 
 	// Check what kind of change was made to each task
 	Object.keys(changes).forEach((key) => {
