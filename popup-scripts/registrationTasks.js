@@ -41,13 +41,13 @@ let initTaskRemovalTimeouts = async () => {
 // Draws the task elements in the popup
 let showTaskElements = async () => {
 	let taskOutput = document.getElementById("tasks");
-	taskOutput.textContent = "";
 
 	// Get all current tasks
 	let tasks = await chrome.storage.session.get(null);
 	let taskList = Object.values(tasks).sort((a, b) => a.created - b.created);
 
 	// Add text for each task
+	taskOutput.textContent = "";
 	taskList.forEach((task) => {
 		let firstLine = `[${task.status}] ${task.lva}`;
 		let taskInfo = task.status == "success" ? `(${task.time}ms) (place ${task.number})` : `(${Math.max(0, Math.round((task.target - Date.now()) / 1000))}s remaining)`;
