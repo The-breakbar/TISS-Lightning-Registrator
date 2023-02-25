@@ -3,6 +3,9 @@ let pageInfo;
 let pageType;
 let tabId;
 
+// Registration tasks are handled in registrationTasks.js
+initTaskRemovalTimeouts();
+
 // Check if tab is a registration page
 chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	tabId = tabs[0].id;
@@ -21,21 +24,6 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
 	}
 
-	// Update the option select
-	let select = document.getElementById("option-select");
-	pageInfo.options.forEach((option) => {
-		// Create option element
-		let optElement = document.createElement("option");
-		optElement.value = option.id;
-		optElement.textContent = option.name;
-
-		// Add the date for exam options to be able to distinguish them
-		if (pageType == "exam") optElement.textContent += ` (${option.date})`;
-
-		// Add the option to the select
-		select.appendChild(optElement);
-	});
+	// Option selector is handled in optionSelector.js
+	initOptionSelector();
 });
-
-// Registration tasks are handled in registrationTasks.js
-initTaskRemovalTimeouts();

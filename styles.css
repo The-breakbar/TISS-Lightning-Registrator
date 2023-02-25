@@ -2,6 +2,6 @@ body {
 	width: 300px;
 }
 
-div {
+#tasks {
 	white-space: pre-wrap;
 }
