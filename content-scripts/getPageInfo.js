@@ -41,7 +41,7 @@ if (expandElement) {
 	// Add new click event listener
 	expandElementClone.onclick = () => {
 		alert(
-			`[TISS Lightning Registrator Extension]\n\n` +
+			`TISS Lightning Registrator Extension\n\n` +
 				`The extension has disabled the functionality of the expand button. It can lead to unexpected behaviour if it is clicked while a registration is ongoing.\n\n` +
 				`If you want to expand the list, please temporarily disable the extension and reload the page. After you are done, you can re-enable the extension.`
 		);
