@@ -137,7 +137,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 	// This function is called when the first valid ViewState is obtained
 	// It attempts to send the registration request until it succeeds or the maxAttempts is reached
-	// The requests are sent in series
+	// The requests are currently sent in series, for the following reasons:
+	// - Multiple requests at once will only get a response from the server one at a time, and might possibly also slow down the response rate
+	// - It is generally expected that the first request succeeds, as it almost always does, the other attempts are just incase something unexpected happens
+	// - While sending many requests at once, it has been observed that the response is an error, even if the registration was successfully processed internally
+	//   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
+	// The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
 	let registerLoop = async (firstViewState) => {
 		// Log the time when the page starts being refreshed
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
