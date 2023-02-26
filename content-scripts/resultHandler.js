@@ -1,5 +1,21 @@
 // This is a content script responsible for handling the results of the registration attempts
+const TASK_EXPIRY = 30000;
 
+// Helper function to update the task in the session storage
+let updateTask = async (update) => {
+	let task;
+	// Just in case the task is not stored yet
+	// During regular operation it is always stored, but the execution might reach this point before it is added to session storage
+	while (!task) {
+		task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+	}
+	if (task.status == "queued" || task.status == "running") {
+		task = Object.assign(task, update);
+		chrome.storage.session.set({ [tabId]: task });
+	}
+};
+
+// Handle the case where the registration loop finished
 let handleResult = async (message) => {
 	let { response, tabId, attempts, errors, time, optionId } = message;
 
@@ -13,45 +29,27 @@ let handleResult = async (message) => {
 
 	if (response) {
 		console.log("Registered as number " + number);
-
-		let update = {
-			status: "success",
-			expiry: Date.now() + 30000,
-			number,
-			time
-		};
-		let updateTask = async () => {
-			let task;
-			while (!task) {
-				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
-			}
-			if (task.status == "queued" || task.status == "running") {
-				task = Object.assign(task, update);
-				chrome.storage.session.set({ [tabId]: task });
-			}
-		};
-		updateTask();
 	} else {
 		console.log("Registration failed");
-
-		let update = {
-			tabId,
-			status: "failed",
-			expiry: Date.now() + 30000,
-			time
-		};
-		let updateTask = async () => {
-			let task;
-			while (!task) {
-				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
-			}
-			if (task.status == "queued" || task.status == "running") {
-				task = Object.assign(task, update);
-				chrome.storage.session.set({ [tabId]: task });
-			}
-		};
-		updateTask();
 	}
+
+	// Update the task in the session storage
+	let update = {
+		status: response ? "success" : "failed",
+		expiry: Date.now() + TASK_EXPIRY,
+		number,
+		time
+	};
+
+	updateTask(update);
 };
 
-let handleRefreshTimeout = async () => {};
+// Handle the case where the refresh loop finished
+let handleRefreshTimeout = async () => {
+	let update = {
+		status: "failed",
+		expiry: Date.now() + TASK_EXPIRY
+	};
+
+	updateTask(update);
+};

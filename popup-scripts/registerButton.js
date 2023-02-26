@@ -1,6 +1,7 @@
 // This file handles the callback fo the register button, which sends the registration request to the content script
 // It also handles the enabling/disabling of the button, aswell as the time zone calculation for the registration date
 
+const TASK_EXPIRY = 30000;
 let registerButton = document.getElementById("register-button");
 
 // If an option is selected, enable the register button if the option has no slots
@@ -59,7 +60,7 @@ registerButton.addEventListener("click", async () => {
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
 		target: timestamp,
-		expiry: Math.max(Date.now(), timestamp) + 30000
+		expiry: Math.max(Date.now(), timestamp) + TASK_EXPIRY
 	};
 	chrome.storage.session.set({ [tabId.toString()]: task });
 });
