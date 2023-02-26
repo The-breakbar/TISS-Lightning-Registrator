@@ -51,7 +51,7 @@ registerButton.addEventListener("click", async () => {
 	chrome.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
-		timestamp: getAccurateStartTime(optionInfo.start),
+		timestamp: targetTime, //getAccurateStartTime(optionInfo.start),
 		optionId,
 		slot
 	});
