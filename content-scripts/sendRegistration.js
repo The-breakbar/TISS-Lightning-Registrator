@@ -10,9 +10,6 @@
 //  action: "sendRegistration"
 //  tabId: Id of the tab which is messaged
 //  timestamp: Timestamp of when the requests should start sending in milliseconds
-//  startOffset: How many ms before the timestamp the refresh loop should start
-//  stopOffset: How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
-//  maxAttempts: Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
 //  optionId: Id of the option, starting from the first "j_id" until the colon and number (e.g. "j_id_52:0:j_id_5d:j_id_5g:0") (only for group and exam)
 //  slot: A two string array containing the slot start and end time (e.g. ["10:00", "10:30"]) (only for exam)
 // }
@@ -70,6 +67,11 @@
 // If a request wants to be sent to a registration that just opened, a new valid ViewState has to be obtained by refreshing the page
 // The response to the first registration request will contain a new ViewState, which can be used for the confirmation request
 
+// Define general registration parameters
+const START_OFFSET = 30000; // How many ms before the timestamp the refresh loop should start
+const STOP_OFFSET = 20000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
+const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
+
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
 // The dsrid value can be any 3-digit number, but the ClientWindow id has to be the same as the one in the url
@@ -96,16 +98,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Log the time when the message was received
 	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Received registration request...");
 
-	// Set a timeout that will run "startOffset" milliseconds before the registration opens
+	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
-	// If the button is not found after the stopOffset specified time, the loop will stop
-	let { tabId, timestamp, startOffset, stopOffset, maxAttempts, optionId, slot } = message;
-	let remainingTime = Math.max(0, timestamp - Date.now() - startOffset);
+	// If the button is not found after the STOP_OFFSET specified time, the loop will stop
+	let { tabId, timestamp, optionId, slot } = message;
+	let remainingTime = Math.max(0, timestamp - Date.now() - START_OFFSET);
 	setTimeout(async () => {
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
 
-		let stopTime = Date.now() + startOffset + stopOffset;
+		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
 		while (Date.now() < stopTime) {
 			// Log that a refresh is being attempted
 			console.log("Refreshing page...");
@@ -161,7 +163,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		let response;
 		let timeStart = Date.now();
 
-		while (attempts < maxAttempts && !response) {
+		while (attempts < MAX_ATTEMPTS && !response) {
 			attempts++;
 
 			// Attempt to send the requests
