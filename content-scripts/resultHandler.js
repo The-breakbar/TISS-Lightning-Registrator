@@ -2,7 +2,7 @@
 const TASK_EXPIRY = 30000;
 
 // Helper function to update the task in the session storage
-let updateTask = async (update) => {
+let updateTask = async (tabId, update) => {
 	let task;
 	// Just in case the task is not stored yet
 	// During regular operation it is always stored, but the execution might reach this point before it is added to session storage
@@ -41,15 +41,15 @@ let handleResult = async (message) => {
 		time
 	};
 
-	updateTask(update);
+	updateTask(tabId, update);
 };
 
 // Handle the case where the refresh loop finished
-let handleRefreshTimeout = async () => {
+let handleRefreshTimeout = async (tabId) => {
 	let update = {
 		status: "failed",
 		expiry: Date.now() + TASK_EXPIRY
 	};
 
-	updateTask(update);
+	updateTask(tabId, update);
 };

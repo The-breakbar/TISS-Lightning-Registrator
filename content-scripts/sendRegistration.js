@@ -132,7 +132,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
 
 		// Timeout is handled in resultHandler.js
-		handleRefreshTimeout();
+		handleRefreshTimeout(tabId);
 	}, remainingTime);
 
 	// This function is called when the first valid ViewState is obtained
