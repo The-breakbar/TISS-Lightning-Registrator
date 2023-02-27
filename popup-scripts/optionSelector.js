@@ -3,15 +3,37 @@
 // The option id is stored as the html id of the option, the slot time is stored as "start,end"
 // If a selector has not been selected, the value is an empty string
 
+let optionSelect = document.getElementById("option-select");
+
 // Add the registration options to the selector when the popup is opened
 let initOptionSelector = () => {
+	// Filter out any options which already started and are not available anymore (getAccurateStartTime is defined in registerButton.js)
+	pageInfo.options = pageInfo.options.filter((option) => !(getAccurateStartTime(option.start) < new Date() && !option.available));
+	// Filter out any options which are already registered or full
+	pageInfo.options = pageInfo.options.filter((option) => {
+		console.log(option);
+		let full;
+		if (option.participants != "unlimited") {
+			let current = parseInt(option.participants.split("/")[0]);
+			let max = parseInt(option.participants.split("/")[1]);
+			full = current >= max;
+		}
+		return !option.registered && !full;
+	});
+
 	// Insert select prompt element
 	let prompt = document.createElement("option");
 	prompt.textContent = "Select a registration option";
 	prompt.value = "";
 	prompt.selected = true;
 	prompt.hidden = true;
-	document.getElementById("option-select").appendChild(prompt);
+	optionSelect.appendChild(prompt);
+
+	// If there are no options left, disable the select
+	if (pageInfo.options.length == 0) {
+		optionSelect.disabled = true;
+		return;
+	}
 
 	// Insert the registration options
 	pageInfo.options.forEach((option) => {
@@ -24,12 +46,12 @@ let initOptionSelector = () => {
 		if (pageType == "exam") optElement.textContent += ` (${option.date})`;
 
 		// Add the option to the select
-		document.getElementById("option-select").appendChild(optElement);
+		optionSelect.appendChild(optElement);
 	});
 };
 
 // If option is selected, check if it has slots and add them to the slot selector
-document.getElementById("option-select").addEventListener("change", (event) => {
+optionSelect.addEventListener("change", (event) => {
 	// Determine the selected option
 	let optionId = event.target.value;
 	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
