@@ -24,18 +24,9 @@ let initOptionSelector = () => {
 		return !option.registered && !full;
 	});
 
-	// Insert select prompt element
-	let prompt = document.createElement("option");
-	prompt.textContent = "Select a registration option";
-	prompt.value = "";
-	prompt.selected = true;
-	prompt.hidden = true;
-	optionSelect.appendChild(prompt);
-
 	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {
-		let infoMessage = getInfoMessage("info", "There are no valid registration options available on this page.");
-		document.querySelector(`section[name="info"]`).appendChild(infoMessage);
+		document.querySelector(`section[name="info"] p[name="no-options"]`).hidden = false;
 		return;
 	}
 
