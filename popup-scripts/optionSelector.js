@@ -6,9 +6,18 @@
 let optionSelect = document.getElementById("option-select");
 
 // Add the registration options to the selector when the popup is opened
-let initOptionSelector = () => {
+let initOptionSelector = async () => {
 	// Reveal selector section
 	document.querySelector(`section[name="register"]`).hidden = false;
+
+	// Check if there is already an ongoing registration task in this tab
+	let ongoingTask = (await chrome.storage.session.get(tabId.toString()))[tabId];
+	let finished = ongoingTask?.status == "success" || ongoingTask?.status == "failure";
+	if (ongoingTask && !finished) {
+		// Show a message
+		document.querySelector(`section[name="info"] p[name="ongoing-task"]`).hidden = false;
+		return;
+	}
 
 	// Filter out any options which already started and are not available anymore (getAccurateStartTime is defined in registerButton.js)
 	pageInfo.options = pageInfo.options.filter((option) => !(getAccurateStartTime(option.start) < new Date() && !option.available));

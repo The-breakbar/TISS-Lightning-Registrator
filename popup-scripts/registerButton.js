@@ -70,6 +70,9 @@ registerButton.addEventListener("click", async () => {
 	registerButton.disabled = true;
 	document.getElementById("option-select").disabled = true;
 	document.getElementById("slot-select").disabled = true;
+
+	// Show active registration info text
+	document.querySelector(`section[name="info"] p[name="active-registration"]`).hidden = false;
 });
 
 // The displayed registration start on TISS is for the timezone of Vienna
