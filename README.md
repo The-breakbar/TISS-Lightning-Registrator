@@ -1,4 +1,4 @@
-# ⚡TISS Lightning Registrator ⚡
+# ⚡TISS Lightning Registrator⚡
 
 Note: The extension is currently in development. It is functional and ready for use, as the remaining features are only for the UI, however, it is not yet fully tested and may contain bugs. If you find any bugs, please report them in the issues.
 
