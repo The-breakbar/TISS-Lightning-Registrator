@@ -7,6 +7,9 @@ let optionSelect = document.getElementById("option-select");
 
 // Add the registration options to the selector when the popup is opened
 let initOptionSelector = () => {
+	// Reveal selector section
+	document.querySelector(`section[name="register"]`).hidden = false;
+
 	// Filter out any options which already started and are not available anymore (getAccurateStartTime is defined in registerButton.js)
 	pageInfo.options = pageInfo.options.filter((option) => !(getAccurateStartTime(option.start) < new Date() && !option.available));
 	// Filter out any options which are already registered or full
@@ -29,11 +32,15 @@ let initOptionSelector = () => {
 	prompt.hidden = true;
 	optionSelect.appendChild(prompt);
 
-	// If there are no options left, disable the select
+	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {
-		optionSelect.disabled = true;
+		let infoMessage = getInfoMessage("info", "There are no valid registration options available on this page.");
+		document.querySelector(`section[name="info"]`).appendChild(infoMessage);
 		return;
 	}
+
+	// If the options are valid, enable the option selector
+	optionSelect.disabled = false;
 
 	// Insert the registration options
 	pageInfo.options.forEach((option) => {

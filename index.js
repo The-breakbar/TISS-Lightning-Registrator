@@ -17,12 +17,19 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	else if (/groupList/.test(tabUrl)) pageType = "group";
 	else if (/examDate/.test(tabUrl)) pageType = "exam";
 
+	// Switch the info text from "wrong url" to "loading"
+	document.querySelector(`section[name="info"] p[name="wrong-url"]`).hidden = true;
+	document.querySelector(`section[name="info"] p[name="page-load"]`).hidden = false;
+
 	// Get the page info from the content script
 	// This is necessary because the popup can be opened before the content script has loaded
 	while (!pageInfo) {
 		// Catch empty because it just means the tab hasn't loaded yet
 		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
 	}
+
+	// Hide loading text
+	document.querySelector(`section[name="info"] p[name="page-load"]`).hidden = true;
 
 	// Option selector is handled in optionSelector.js
 	initOptionSelector();

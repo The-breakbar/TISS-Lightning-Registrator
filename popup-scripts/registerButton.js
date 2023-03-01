@@ -59,10 +59,17 @@ registerButton.addEventListener("click", async () => {
 		created: Date.now(),
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
+		date: optionInfo.date,
+		slot,
 		target: timestamp,
 		expiry: Math.max(Date.now(), timestamp) + TASK_EXPIRY
 	};
 	chrome.storage.session.set({ [tabId.toString()]: task });
+
+	// Disable the button and select elements
+	registerButton.disabled = true;
+	document.getElementById("option-select").disabled = true;
+	document.getElementById("slot-select").disabled = true;
 });
 
 // The displayed registration start on TISS is for the timezone of Vienna

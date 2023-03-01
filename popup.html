@@ -2,22 +2,69 @@
 <html>
 	<head>
 		<link rel="stylesheet" href="styles.css" />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700" />
 	</head>
 	<body>
-		<div>
-			<select name="option-select" id="option-select"></select>
-		</div>
-		<div>
-			<select hidden name="slot-select" id="slot-select"></select>
-		</div>
-		<div>
-			<button disabled id="register-button">Register</button>
-		</div>
-		<div id="tasks"></div>
+		<main>
+			<h1>Lightning Registrator</h1>
+
+			<section name="info">
+				<p class="info-text info" name="wrong-url">
+					Navigate to any LVA/group/exam registration page on
+					<a target="_blank" href="https://tiss.tuwien.ac.at/education/favorites.xhtml">TISS</a>
+					to start a registration.
+				</p>
+				<p hidden class="info-text info" name="page-load">Waiting for the page to load...</p>
+				<p hidden class="info-text info">
+					Registrations run in the background, you can change tabs/windows. Closing or changing a tab will cancel the registration for that tab.
+				</p>
+				<p hidden class="info-text warning">There is already a registration in this tab. Please open a new tab if you'd like to start a new one.</p>
+			</section>
+
+			<section hidden name="register">
+				<select disabled id="option-select">
+					<option selected hidden value="">Select a registration option</option>
+				</select>
+
+				<select hidden id="slot-select"></select>
+
+				<button disabled id="register-button">Start registration</button>
+			</section>
+
+			<section name="tasks">
+				<h2>Active Registrations</h2>
+				<div id="task-info">No active registrations</div>
+				<div class="task">
+					<h3>queued <span>starting in 15s</span></h3>
+					<div class="task-content">Objektorientierte Programmiertechniken</div>
+					<div class="task-content">Puntigam-03-14 (10:00-10:15, 14.03.2023)</div>
+				</div>
+				<div class="task warning">
+					<h3>Running...</h3>
+					<div class="task-content">Pilots in Mobile Interaction: User-centered Interaction Research and Evaluation</div>
+					<div class="task-content">LVA-Anmeldung</div>
+				</div>
+				<div class="task success">
+					<h3>Success <span>452ms | Number 38 (or lower)</span></h3>
+					<div class="task-content">Software Engineering und Projektmanagement</div>
+					<div class="task-content">SEPM VO Prüfung (15.03.2023)</div>
+				</div>
+				<div class="task failure">
+					<h3>Failure</h3>
+					<div class="task-content">Software Engineering und Projektmanagement</div>
+					<div class="task-content">SEPM VO Prüfung (15.03.2023)</div>
+				</div>
+			</section>
+			<footer>
+				Version 0.3.0 -
+				<a target="_blank" href="https://github.com/The-breakbar/TISS-Lightning-Registrator">GitHub</a>
+			</footer>
+		</main>
 
 		<script src="popup-scripts/optionSelector.js"></script>
-		<script src="popup-scripts/registrationTasks.js"></script>
+		<script src="popup-scripts/popupComponents.js"></script>
 		<script src="popup-scripts/registerButton.js"></script>
+		<script src="popup-scripts/registrationTasks.js"></script>
 		<script src="index.js"></script>
 	</body>
 </html>

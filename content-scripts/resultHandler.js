@@ -35,7 +35,7 @@ let handleResult = async (message) => {
 
 	// Update the task in the session storage
 	let update = {
-		status: response ? "success" : "failed",
+		status: response ? "success" : "failure",
 		expiry: Date.now() + TASK_EXPIRY,
 		number,
 		time
@@ -47,7 +47,7 @@ let handleResult = async (message) => {
 // Handle the case where the refresh loop finished
 let handleRefreshTimeout = async (tabId) => {
 	let update = {
-		status: "failed",
+		status: "failure",
 		expiry: Date.now() + TASK_EXPIRY
 	};
 

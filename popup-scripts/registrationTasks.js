@@ -6,9 +6,11 @@
 // A task is stored with the following structure:
 // {
 //  tabId : Id of the tab that the registration is running in
-//  status : Status of the registration (queued, running, success, failed)
+//  status : Status of the registration (queued, running, success, failure)
 //  lva : Name of the LVA
 //  name : Name of the registration option
+//  date : Date of the registration option (only for exams)
+//  slot : Slot of the registration option (only for exams)
 //  target : Time when the registration opens
 //  expiry : Time when the registration task expires, incase any errors occur
 //  number : The place number of the registration (if successful)
@@ -40,19 +42,19 @@ let initTaskRemovalTimeouts = async () => {
 
 // Draws the task elements in the popup
 let showTaskElements = async () => {
-	let taskOutput = document.getElementById("tasks");
+	let taskOutput = document.querySelector(`section[name="tasks"]`);
 
 	// Get all current tasks
 	let tasks = await chrome.storage.session.get(null);
 	let taskList = Object.values(tasks).sort((a, b) => a.created - b.created);
 
-	// Add text for each task
-	taskOutput.textContent = "";
+	// Clear all elements with the task class
+	let taskElements = taskOutput.querySelectorAll(".task");
+	taskElements.forEach((element) => element.remove());
+
+	// Add task elements
 	taskList.forEach((task) => {
-		let firstLine = `[${task.status}] ${task.lva}`;
-		let taskInfo = task.status == "success" ? `(${task.time}ms) (place ${task.number})` : `(${Math.max(0, Math.round((task.target - Date.now()) / 1000))}s remaining)`;
-		let secondLine = `${task.name} ${taskInfo}`;
-		taskOutput.textContent += `${firstLine}\n${secondLine}\n`;
+		taskOutput.appendChild(getTaskElement(task));
 	});
 };
 

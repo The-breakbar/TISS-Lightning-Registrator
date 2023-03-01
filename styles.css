@@ -1,7 +1,243 @@
-body {
-	width: 300px;
+/* Global styles */
+:root {
+	--background: #002d45;
+	--header: #0070a8;
+	--primary: #004161;
+	--secondary: #59a5d8;
+	--tertiary: #397a9a;
+	--text-color: #ffffff;
+	--link-color: #60daf0;
+	--border-radius: 6px;
+	
+	--shadow-strong: rgba(0, 0, 0, 0.4) 0px 3px 8px;
+	--shadow: rgba(0, 0, 0, 0.2) 0px 3px 8px;
+	
+	--success: #0d9947;
+	--success-border: #2bc76c;
+	--warning: #be7b16;
+	--warning-border: #f7ae12;
+	--failure: #b22f2f;
+	--failure-border: #eb4343;
 }
 
-#tasks {
-	white-space: pre-wrap;
+body {
+	margin: 0;
+	font-family: "Noto Sans", "Segoe UI", Arial, sans-serif;
+	color: var(--text-color);
+}
+
+a {
+	color: var(--link-color);
+}
+
+main {
+	width: 300px;
+	background-color: var(--background);
+	cursor: default;
+	user-select: none;
+}
+
+/* Set transitions for hover effects and button clicks */
+select, button {
+	transition:
+		filter ease-in-out 0.2s,
+		border-radius ease-in-out 0.2s,
+		transform ease-in-out 0.15s;
+}
+
+select:hover, button:hover {
+	filter: brightness(1.1);
+}
+
+button:active {
+	transform: scale(0.9);
+}
+
+/* Top header bar */
+h1 {
+	margin: 0;
+	padding: 10px;
+	background-color: var(--header);
+	color: var(--text-color);
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 18px;
+	font-weight: normal;
+	box-shadow: var(--shadow-strong);
+}
+
+/* Sections and their elements */
+section {
+	margin: 14px
+}
+
+section > * + * {
+	margin-top: 14px;
+}
+
+/* Info text boxes */
+.info-text {
+	margin: 0;
+	padding: 7px;
+	font-size: 12px;
+	border-radius: var(--border-radius);
+}
+
+.info-text + .info-text {
+	margin-top: 7px;
+}
+
+/* Registration form */
+section[name="register"] select {
+	width: 100%;
+	padding: 8px 40px 8px 12px;
+	background-color: var(--primary);
+	color: var(--text-color);
+	border: 1px solid var(--secondary);
+	border-radius: var(--border-radius);
+	box-shadow: var(--shadow);
+	outline: none;
+	appearance: none;
+	cursor: pointer;
+
+	/* Little arrow */
+	background-image:
+    	linear-gradient(45deg, transparent 50%, var(--secondary) 50%),
+    	linear-gradient(135deg, var(--secondary) 50%, transparent 50%);
+	background-position:
+		calc(100% - 20px) 12px,
+		calc(100% - 12px) 12px;
+		
+	background-size:
+		8px 8px,
+		8px 8px;
+	background-repeat: no-repeat;
+}
+
+section[name="register"] select:enabled:hover {
+	border-radius: 15px;
+}
+
+/* Register button */
+section[name="register"] button {
+	width: 100%;
+	padding: 6px;
+	background-color: var(--success);
+	color: var(--text-color);
+	font-size: 18px;
+	border: none;
+	border-radius: var(--border-radius);
+	box-shadow: var(--shadow);
+	cursor: pointer;
+}
+
+/* Disabled selects and buttons */
+section[name="register"] select:disabled, section[name="register"] button:disabled {
+	cursor: not-allowed;
+	filter: grayscale(1);
+}
+
+section[name="register"] button:disabled {
+	transform: none;
+}
+
+/* Task list header */
+h2 {
+	margin-top: 22px;
+	border-bottom: 1px solid var(--secondary);
+	font-size: 16px;
+	font-weight: normal;
+	text-transform: uppercase;
+	
+}
+
+/* Show the "No tasks" message when there are no tasks */
+#task-info {
+	text-align: center;
+	font-size: 14px;
+	display: none;
+}
+
+#task-info:only-of-type {
+	display: block;
+}
+
+
+/* Task elements */
+section[name="tasks"] > * + * {
+	margin-top: 8px;
+}
+
+.task {
+	padding: 8px;
+	background-color: var(--primary);
+	font-size: 12px;
+	border: 1px solid var(--secondary);
+	border-radius: var(--border-radius);
+	box-shadow: var(--shadow);
+}
+
+/* Task header */
+.task h3 {
+	margin: 0;
+	margin-bottom: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid var(--secondary);
+	font-size: 16px;
+	font-weight: bold;
+}
+
+/* Border colors for the other statuses */
+section[name="tasks"] .warning h3 {
+	border-color: var(--warning-border);
+}
+
+section[name="tasks"] .success h3 {
+	border-color: var(--success-border);
+}
+
+section[name="tasks"] .failure h3 {
+	border-color: var(--failure-border);
+}
+
+/* Task header infotext */
+.task h3 span {
+	font-size: 10px;
+	font-weight: normal;
+}
+
+/* Task text */
+.task-content {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Footer */
+footer {
+	text-align: center;
+	font-size: 11px;
+	padding: 5px;
+	background-color: var(--primary);
+}
+
+/* Colors for the different statuses */
+.info {
+	background-color: var(--tertiary);
+	border: 1px solid var(--secondary);
+}
+
+.warning {
+	background-color: var(--warning);
+	border: 1px solid var(--warning-border);
+}
+
+.success {
+	background-color: var(--success);
+	border: 1px solid var(--success-border);
+}
+
+.failure {
+	background-color: var(--failure);
+	border: 1px solid var(--failure-border);
 }
