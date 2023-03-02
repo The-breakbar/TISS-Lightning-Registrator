@@ -1,6 +1,6 @@
 # ⚡TISS Lightning Registrator⚡
 
-Note: The extension is currently in development. It is functional and ready for use, as the remaining features are only for the UI, however, it is not yet fully tested and may contain bugs. If you find any bugs, please report them in the issues.
+Note: The extension is currently in development. It is functional and ready for use, as the remaining features are only for the UI, however, it is not yet fully tested and may contain bugs. If you find any bugs, please report them in the issues. Errors can be found in the console of the tab where the registration was started, and also in your installed extensions browser page. There will be an "Errors" button if any occured.
 
 TISS Lightning Registrator is a browser extension that automatically registers for an LVA/group/exam in TISS, as soon as the registration opens. The extension detects when a registration becomes available and immediately sends the required requests to register for it, executing the registration process as fast as possible. On top of that, the extension includes these additional features:
 
