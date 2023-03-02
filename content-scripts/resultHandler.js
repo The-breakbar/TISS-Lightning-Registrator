@@ -17,7 +17,7 @@ let updateTask = async (tabId, update) => {
 
 // Handle the case where the registration loop finished
 let handleResult = async (message) => {
-	let { response, tabId, attempts, errors, time, optionId } = message;
+	let { response, tabId, attempts, time, optionId } = message;
 
 	// Get the count of already registered students
 	let pageDocument = await getPage();

@@ -163,7 +163,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 		// Request loop
 		let attempts = 0;
-		let errors = [];
 		let viewState = firstViewState;
 		let response;
 		let timeStart = Date.now();
@@ -189,11 +188,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration success with attempt number " + attempts);
 			} catch (error) {
 				// Log the error
-				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
 				console.error(error);
-
-				// If the request fails, store the error for later
-				errors.push(error.message);
+				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
 			}
 		}
 
@@ -208,7 +204,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			response,
 			tabId,
 			attempts,
-			errors,
 			time,
 			optionId
 		});
