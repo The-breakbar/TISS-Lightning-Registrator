@@ -8,11 +8,13 @@ let registerButton = document.getElementById("register-button");
 document.getElementById("option-select").addEventListener("change", () => {
 	let optionId = document.getElementById("option-select").value;
 	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
-	if (optionInfo?.slots) {
-		registerButton.disabled = true;
-	} else {
-		registerButton.disabled = false;
-	}
+
+	// Display a warning if the registration date is more than 10 days in the future
+	let moreThan10Days = optionInfo.start > new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
+	document.querySelector(`section[name="info"] p[name="long-wait"]`).hidden = !moreThan10Days;
+
+	// Disable the button if the option has slots or the registration date is more than 10 days in the future
+	registerButton.disabled = moreThan10Days || optionInfo.slots;
 });
 
 // If a slot is selected, enable the register button

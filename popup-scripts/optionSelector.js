@@ -62,33 +62,34 @@ optionSelect.addEventListener("change", (event) => {
 	let optionId = event.target.value;
 	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
 
+	// If no slot, hide the slot selector
 	let slotSelect = document.getElementById("slot-select");
-	if (optionInfo?.slots) {
-		// Show the slot selector if the option has slots
-		slotSelect.hidden = false;
-
-		// Remove all options
-		while (slotSelect.firstChild) {
-			slotSelect.removeChild(slotSelect.firstChild);
-		}
-
-		// Add a prompt option
-		let prompt = document.createElement("option");
-		prompt.textContent = "Select a slot";
-		prompt.value = "";
-		prompt.selected = true;
-		prompt.hidden = true;
-		slotSelect.appendChild(prompt);
-
-		// Add the slots to the select
-		optionInfo.slots.forEach((slot) => {
-			let slotOption = document.createElement("option");
-			slotOption.value = slot.start + "," + slot.end; // Option value is start and end time separated by a comma
-			slotOption.textContent = slot.start + " - " + slot.end;
-			slotSelect.appendChild(slotOption);
-		});
-	} else {
-		// Hide the slot selector if the option has no slots
+	if (!optionInfo?.slots) {
 		slotSelect.hidden = true;
+		return;
 	}
+
+	// If there are slots, add them to the slot selector
+	slotSelect.hidden = false;
+
+	// Remove all options
+	while (slotSelect.firstChild) {
+		slotSelect.removeChild(slotSelect.firstChild);
+	}
+
+	// Add a prompt option
+	let prompt = document.createElement("option");
+	prompt.textContent = "Select a slot";
+	prompt.value = "";
+	prompt.selected = true;
+	prompt.hidden = true;
+	slotSelect.appendChild(prompt);
+
+	// Add the slots to the select
+	optionInfo.slots.forEach((slot) => {
+		let slotOption = document.createElement("option");
+		slotOption.value = slot.start + "," + slot.end; // Option value is start and end time separated by a comma
+		slotOption.textContent = slot.start + " - " + slot.end;
+		slotSelect.appendChild(slotOption);
+	});
 });
