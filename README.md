@@ -23,9 +23,9 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 1. Download the zip of the latest release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
 2. Navigate to the browser page of your installed extensions. It can be found under "Manage extensions" in your browser options or by going to the following links depending on your browser:
 
-   - Chrome: [chrome://extensions](chrome://extensions)
-   - Opera: [opera://extensions](opera://extensions)
-   - Edge: [edge://extensions](edge://extensions)
+   - Chrome: `chrome://extensions`
+   - Opera: `opera://extensions`
+   - Edge: `edge://extensions`
 
 3. Enable "Developer mode" in the top right (left side for Edge).
 4. Click the "Load unpacked extension" button and select the unpacked folder which you downloaded.
