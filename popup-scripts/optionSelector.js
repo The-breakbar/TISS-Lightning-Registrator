@@ -20,10 +20,9 @@ let initOptionSelector = async () => {
 	}
 
 	// Filter out any options which already started and are not available anymore (getAccurateStartTime is defined in registerButton.js)
-	pageInfo.options = pageInfo.options.filter((option) => !(getAccurateStartTime(option.start) < new Date() && !option.available));
+	pageInfo.options = pageInfo.options.filter((option) => !(option.start < new Date() && !option.available));
 	// Filter out any options which are already registered or full
 	pageInfo.options = pageInfo.options.filter((option) => {
-		console.log(option);
 		let full;
 		if (option.participants != "unlimited") {
 			let current = parseInt(option.participants.split("/")[0]);

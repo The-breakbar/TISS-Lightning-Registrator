@@ -21,7 +21,7 @@ let getTaskElement = (task) => {
 	let taskHeaderStatus = document.createElement("span");
 	taskHeader.textContent = taskText[task.status] + " ";
 	if (task.status == "queued") {
-		taskHeaderStatus.textContent = `starting in ${Math.max(0, Math.round((task.target - Date.now()) / 1000))}s`;
+		taskHeaderStatus.textContent = `starting in ${Math.max(0, Math.round((task.timestamp - Date.now()) / 1000))}s`;
 	} else if (task.status == "success") {
 		taskHeaderStatus.textContent = `${task.time}ms | Number ${task.number} (or lower)`;
 	}

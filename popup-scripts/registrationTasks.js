@@ -11,7 +11,7 @@
 //  name : Name of the registration option
 //  date : Date of the registration option (only for exams)
 //  slot : Slot of the registration option (only for exams)
-//  target : Time when the registration opens
+//  timestamp : Time when the registration opens
 //  expiry : Time when the registration task expires, incase any errors occur
 //  number : The place number of the registration (if successful)
 //  time : How long the registration took (if successful)

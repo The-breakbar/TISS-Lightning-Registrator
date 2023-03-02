@@ -41,13 +41,11 @@ registerButton.addEventListener("click", async () => {
 		}
 	}
 
-	let timestamp = getAccurateStartTime(optionInfo.start);
-
 	// Send the registration request to the content script
 	chrome.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
-		timestamp,
+		timestamp: optionInfo.start,
 		optionId,
 		slot
 	});
@@ -56,13 +54,13 @@ registerButton.addEventListener("click", async () => {
 	let task = {
 		tabId,
 		status: "queued",
+		timestamp: optionInfo.start,
 		created: Date.now(),
 		lva: pageInfo.lvaName,
 		name: optionInfo.name,
 		date: optionInfo.date,
 		slot,
-		target: timestamp,
-		expiry: Math.max(Date.now(), timestamp) + TASK_EXPIRY
+		expiry: Math.max(Date.now(), optionInfo.start) + TASK_EXPIRY
 	};
 	chrome.storage.session.set({ [tabId.toString()]: task });
 
@@ -74,37 +72,3 @@ registerButton.addEventListener("click", async () => {
 	// Show active registration info text
 	document.querySelector(`section[name="info"] p[name="active-registration"]`).hidden = false;
 });
-
-// The displayed registration start on TISS is for the timezone of Vienna
-// This function takes the daylight saving time into account and returns the correct time
-let getAccurateStartTime = (targetDateString) => {
-	// Get the beginning of daylight saving time (last sunday in march)
-	let DSTstart = new Date();
-	DSTstart.setUTCMonth(2);
-	DSTstart.setUTCDate(31);
-	DSTstart.setUTCHours(1, 0, 0, 0);
-	while (DSTstart.getUTCDay() != 0) {
-		DSTstart.setUTCDate(DSTstart.getUTCDate() - 1);
-	}
-
-	// Get the end of daylight saving time (last sunday in october)
-	let DSTend = new Date();
-	DSTend.setUTCMonth(9);
-	DSTend.setUTCDate(31);
-	DSTend.setUTCHours(1, 0, 0, 0);
-	while (DSTend.getUTCDay() != 0) {
-		DSTend.setUTCDate(DSTend.getUTCDate() - 1);
-	}
-
-	// Create the target date
-	let isDST = DSTstart < Date.now() && Date.now() < DSTend;
-	let [date, time] = targetDateString.split(", ");
-	let [day, month, year] = date.split(".");
-	let [hour, minute] = time.split(":");
-	let targetTime = new Date();
-	targetTime.setUTCFullYear(year, month - 1, day);
-	targetTime.setUTCHours(hour, minute, 0, 0);
-	targetTime.setUTCHours(targetTime.getUTCHours() - (isDST ? 2 : 1)); // Subtract 2 hours for CEST, 1 hour for CET
-
-	return targetTime.getTime();
-};
