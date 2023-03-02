@@ -12,7 +12,6 @@
 //   option.name : Name of registration option
 //   option.date : Date of option (only for exams)
 //   option.start : Start date of registration
-//   option.end : End of registration (may be undefined)
 //   option.available : If registration is already available (boolean)
 //   option.registered: If the user is already registered for this option (boolean)
 //   option.id : Html id of the option (only for groups and exams)
@@ -99,11 +98,10 @@ let gatherPageInfo = () => {
 		Array.from(memberCopy.children)[0].remove();
 		optionInfo.participants = /unlimited|unbegrenzt/.test(memberCopy.textContent) ? "unlimited" : memberCopy.textContent.trim();
 
-		// Registration start/end
-		// The ids of lva pages contain "begin/end", group/exam pages contain "appBeginn/appEnd", so ids containing "egin" and "nd" are selected
+		// Registration start
+		// The ids of lva pages contain "begin", group/exam pages contain "appBeginn", so ids containing "egin" are selected
 		// (this is a very vague selector, but the fields are only preceded by a "members" and "waitingList" field)
 		optionInfo.start = element.querySelector(`span[id*="egin"]`)?.textContent;
-		optionInfo.end = element.querySelector(`span[id*="nd"]`)?.textContent;
 
 		// Get the option id needed for the registration request (only for group and exam pages)
 		// The id is obtained from the span for the participant count (only the identifying part of the id is needed)
