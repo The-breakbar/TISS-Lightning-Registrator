@@ -31,7 +31,7 @@ let getTaskElement = (task) => {
 	// Add the status text depending on the status
 	if (task.status == "queued") {
 		// Queued status is how long until the registration opens
-		headerStatus.textContent = `starting in ${Math.max(0, Math.round((task.timestamp - Date.now()) / 1000))}s`;
+		setCountdown(headerStatus, task.timestamp);
 	} else if (task.status == "success") {
 		// Success status is the time it took and the place number
 		headerStatus.textContent = `${task.time}ms | Number ${task.number} (or lower)`;
@@ -60,4 +60,11 @@ let getTaskElement = (task) => {
 	element.appendChild(optionName);
 
 	return element;
+};
+
+// Creates a countdown element for the given time
+let setCountdown = (element, time) => {
+	let countdown = Math.max(0, Math.round((time - Date.now()) / 1000));
+	element.textContent = `starting in ${countdown}s`;
+	if (countdown > 0) setTimeout(() => setCountdown(element, time), 1000);
 };
