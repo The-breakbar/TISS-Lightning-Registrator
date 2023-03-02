@@ -1,11 +1,12 @@
-// This file updates the option and slot selectors of the popup
+// This file updates the option and slot selectors of the popup, showing relevant messages based on the selection
 // The selected options contain the relevant ids and slot times for the registration as the values
 // The option id is stored as the html id of the option, the slot time is stored as "start,end"
 // If a selector has not been selected, the value is an empty string
 
 let optionSelect = document.getElementById("option-select");
 
-// Add the registration options to the selector when the popup is opened
+// Main function which is called after the page info is received
+// Adds the registration options to the selector and shows relevant info messages
 let initOptionSelector = async () => {
 	// Reveal selector section
 	document.querySelector(`section[name="register"]`).hidden = false;
@@ -19,8 +20,9 @@ let initOptionSelector = async () => {
 		return;
 	}
 
-	// Filter out any options which already started and are not available anymore (getAccurateStartTime is defined in registerButton.js)
+	// Filter out any options which have already opened and are not available anymore
 	pageInfo.options = pageInfo.options.filter((option) => !(option.start < new Date() && !option.available));
+
 	// Filter out any options which are already registered or full
 	pageInfo.options = pageInfo.options.filter((option) => {
 		let full;
@@ -56,26 +58,27 @@ let initOptionSelector = async () => {
 	});
 };
 
-// If option is selected, check if it has slots and add them to the slot selector
+// Called when a new option is selected
+// This handled the relevant messages and adds the slots of the option has any
 optionSelect.addEventListener("change", (event) => {
-	// Determine the selected option
+	// Determine the selected option (undefined if it's an lva option)
 	let optionId = event.target.value;
 	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
 
-	// If no slot, hide the slot selector
+	// Remove all current slots
 	let slotSelect = document.getElementById("slot-select");
+	while (slotSelect.firstChild) {
+		slotSelect.removeChild(slotSelect.firstChild);
+	}
+
+	// If no slot, hide the slot selector
 	if (!optionInfo?.slots) {
 		slotSelect.hidden = true;
 		return;
 	}
 
-	// If there are slots, add them to the slot selector
+	// If there are slots, reveal the slot selector
 	slotSelect.hidden = false;
-
-	// Remove all options
-	while (slotSelect.firstChild) {
-		slotSelect.removeChild(slotSelect.firstChild);
-	}
 
 	// Add a prompt option
 	let prompt = document.createElement("option");

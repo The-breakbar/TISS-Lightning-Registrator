@@ -1,10 +1,10 @@
 // This file handles the callback fo the register button, which sends the registration request to the content script
-// It also handles the enabling/disabling of the button, aswell as the time zone calculation for the registration date
+// It also handles the enabling/disabling of the button and the display of info messages
 
 const TASK_EXPIRY = 30000;
 let registerButton = document.getElementById("register-button");
 
-// If an option is selected, enable the register button if the option has no slots
+// Listener for the option select, it enables the register button if all conditions are met
 document.getElementById("option-select").addEventListener("change", () => {
 	let optionId = document.getElementById("option-select").value;
 	let optionInfo = pageType == "lva" ? pageInfo.options[0] : pageInfo.options.find((option) => option.id == optionId);
@@ -17,19 +17,18 @@ document.getElementById("option-select").addEventListener("change", () => {
 	registerButton.disabled = moreThan10Days || optionInfo.slots;
 });
 
-// If a slot is selected, enable the register button
+// Listener for the slot select, which enables the register button
+// If a slot is selected, it is expected that the option is already valid
 document.getElementById("slot-select").addEventListener("change", () => {
 	registerButton.disabled = false;
 });
 
-// Bind register callback
+// Main button callback, it expects that the selected options are valid
 registerButton.addEventListener("click", async () => {
 	// Get the info of the selected options
 	let optionInfo, optionId, slot;
-
-	// If the page is an LVA page, there is only one option
 	if (pageType == "lva") {
-		optionInfo = pageInfo.options[0];
+		optionInfo = pageInfo.options[0]; // If the page is an LVA page, there is only one option
 	} else {
 		optionId = document.getElementById("option-select").value;
 		if (!optionId) return; // Prevent error if no option is selected

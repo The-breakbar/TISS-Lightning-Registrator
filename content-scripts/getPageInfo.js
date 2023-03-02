@@ -1,4 +1,5 @@
 // This is a content script responsible for extracting the relevant information from the registration pages
+// It also handles the time zone conversion of the registration dates
 // The following message format is required:
 // {
 //  action: "getPageInfo"
