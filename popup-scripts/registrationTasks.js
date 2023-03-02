@@ -15,6 +15,7 @@
 //  expiry : Time when the registration task expires, incase any errors occur
 //  number : The place number of the registration (if successful)
 //  time : How long the registration took (if successful)
+//  error : Error message (if failed)
 // }
 
 let activeTimeouts = {};

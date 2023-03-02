@@ -7,7 +7,7 @@ let registerButton = document.getElementById("register-button");
 // If an option is selected, enable the register button if the option has no slots
 document.getElementById("option-select").addEventListener("change", () => {
 	let optionId = document.getElementById("option-select").value;
-	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
+	let optionInfo = pageType == "lva" ? pageInfo.options[0] : pageInfo.options.find((option) => option.id == optionId);
 
 	// Display a warning if the registration date is more than 10 days in the future
 	let moreThan10Days = optionInfo.start > new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);

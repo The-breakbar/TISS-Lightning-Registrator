@@ -38,7 +38,8 @@ let handleResult = async (message) => {
 		status: response ? "success" : "failure",
 		expiry: Date.now() + TASK_EXPIRY,
 		number,
-		time
+		time,
+		error: response ? undefined : "registration attempted " + attempts + " times"
 	};
 
 	updateTask(tabId, update);
@@ -48,7 +49,8 @@ let handleResult = async (message) => {
 let handleRefreshTimeout = async (tabId) => {
 	let update = {
 		status: "failure",
-		expiry: Date.now() + TASK_EXPIRY
+		expiry: Date.now() + TASK_EXPIRY,
+		error: "registration did not open"
 	};
 
 	updateTask(tabId, update);

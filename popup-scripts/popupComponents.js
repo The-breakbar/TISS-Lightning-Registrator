@@ -1,56 +1,63 @@
 // This file creates the components for the task elements and info messages
 
-// Creates a task element for the given task
-let getTaskElement = (task) => {
-	// Define element and classes
-	let taskElement = document.createElement("div");
-	taskElement.classList.add("task");
-	if (task.status == "success") taskElement.classList.add("success");
-	else if (task.status == "failure") taskElement.classList.add("failure");
-	else if (task.status == "running") taskElement.classList.add("warning");
-
-	let taskText = {
-		queued: "Queued",
-		running: "Running...",
-		success: "Success",
-		failure: "Failure"
-	};
-
-	// Header
-	let taskHeader = document.createElement("h3");
-	let taskHeaderStatus = document.createElement("span");
-	taskHeader.textContent = taskText[task.status] + " ";
-	if (task.status == "queued") {
-		taskHeaderStatus.textContent = `starting in ${Math.max(0, Math.round((task.timestamp - Date.now()) / 1000))}s`;
-	} else if (task.status == "success") {
-		taskHeaderStatus.textContent = `${task.time}ms | Number ${task.number} (or lower)`;
-	}
-	taskHeader.appendChild(taskHeaderStatus);
-	taskElement.appendChild(taskHeader);
-
-	// LVA and registration option
-	let taskContentLVA = document.createElement("div");
-	taskContentLVA.classList.add("task-content");
-	taskContentLVA.textContent = task.lva;
-	taskElement.appendChild(taskContentLVA);
-
-	let taskContentName = document.createElement("div");
-	taskContentName.classList.add("task-content");
-	taskContentName.textContent = task.name;
-	if (task.date != undefined) {
-		let slotText = task.slot ? `${task.slot.join("-")}, ` : "";
-		taskContentName.textContent += ` (${slotText}${task.date})`;
-	}
-	taskElement.appendChild(taskContentName);
-
-	return taskElement;
+const STATUS_TEXT = {
+	queued: "Queued",
+	running: "Running...",
+	success: "Success",
+	failure: "Failure"
 };
 
-// Creates an info message element
-let getInfoMessage = (type, text) => {
-	let infoMessage = document.createElement("p");
-	infoMessage.textContent = "There are no valid registration options available on this page.";
-	infoMessage.classList.add("info-text");
-	infoMessage.classList.add(type);
-	return infoMessage;
+// Creates a task element for the given task
+// A task element has the following structure:
+// <div class="task">
+// 	<h3>Queued <span>(header status text)</span></h3>
+// 	<div class="task-content">(LVA name)</div>
+// 	<div class="task-content">(Registration option name, slot and date for exams)</div>
+// </div>
+
+let getTaskElement = (task) => {
+	// Define element and classes
+	let element = document.createElement("div");
+	element.classList.add("task");
+	if (task.status == "success") element.classList.add("success");
+	else if (task.status == "failure") element.classList.add("failure");
+	else if (task.status == "running") element.classList.add("warning");
+
+	// Create the header
+	let header = document.createElement("h3");
+	let headerStatus = document.createElement("span");
+	header.textContent = STATUS_TEXT[task.status] + " ";
+
+	// Add the status text depending on the status
+	if (task.status == "queued") {
+		// Queued status is how long until the registration opens
+		headerStatus.textContent = `starting in ${Math.max(0, Math.round((task.timestamp - Date.now()) / 1000))}s`;
+	} else if (task.status == "success") {
+		// Success status is the time it took and the place number
+		headerStatus.textContent = `${task.time}ms | Number ${task.number} (or lower)`;
+	} else if (task.status == "failure") {
+		// Failure status is the error message
+		headerStatus.textContent = task.error;
+	}
+	header.appendChild(headerStatus);
+	element.appendChild(header);
+
+	// Create lva name element
+	let lvaName = document.createElement("div");
+	lvaName.classList.add("task-content");
+	lvaName.textContent = task.lva;
+	element.appendChild(lvaName);
+
+	// Create registration option name element
+	let optionName = document.createElement("div");
+	optionName.classList.add("task-content");
+	optionName.textContent = task.name;
+	// Add the slot and date if it is an exam
+	if (task.date != undefined) {
+		let slotText = task.slot ? `${task.slot.join("-")}, ` : "";
+		optionName.textContent += ` (${slotText}${task.date})`;
+	}
+	element.appendChild(optionName);
+
+	return element;
 };
