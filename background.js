@@ -8,5 +8,7 @@ let removeTask = async (tabId) => {
 	if (task?.status == "success" || task?.status == "failure") return;
 	chrome.storage.session.remove(tabId.toString());
 };
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => removeTask(tabId));
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+	if (changeInfo.status == "loading") removeTask(tabId);
+});
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => removeTask(tabId));
