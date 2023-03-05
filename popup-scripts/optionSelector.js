@@ -20,10 +20,7 @@ let initOptionSelector = async () => {
 		return;
 	}
 
-	// Filter out any options which have already opened and are not available anymore
-	pageInfo.options = pageInfo.options.filter((option) => !(option.start < new Date() && !option.available));
-
-	// Filter out any options which are already registered or full
+	// Filter out any options which have no start time, are already registered or full
 	pageInfo.options = pageInfo.options.filter((option) => {
 		let full;
 		if (option.participants != "unlimited") {
@@ -31,8 +28,11 @@ let initOptionSelector = async () => {
 			let max = parseInt(option.participants.split("/")[1]);
 			full = current >= max;
 		}
-		return !option.registered && !full;
+		return option.start && !option.registered && !full;
 	});
+
+	// Filter out any options which have already opened and are not available anymore
+	pageInfo.options = pageInfo.options.filter((option) => !(option.start < new Date() && !option.available));
 
 	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {

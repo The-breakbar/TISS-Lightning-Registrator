@@ -12,7 +12,7 @@
 // options[] : All available LVA/group/exam registration options (array)
 //   option.name : Name of registration option
 //   option.date : Date of option (only for exams)
-//   option.start : Start date of registration (as timestamp)
+//   option.start : Start date of registration (as timestamp) (may be undefined)
 //   option.available : If registration is already available (boolean)
 //   option.registered: If the user is already registered for this option (boolean)
 //   option.id : Html id of the option (only for groups and exams)
