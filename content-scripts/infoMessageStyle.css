@@ -1,0 +1,53 @@
+/* This file contains the style for the info message popup and is inserted as a content-script*/
+/* The small popup appears in the bottom right corner of the screen */
+
+#LightningRegistratorInfoPopup {
+	position: fixed;
+	bottom: 50px;
+	right: 60px;
+	min-width: 150px;
+	display: inline-block;
+	padding: 8px;
+	background-color: #004161;
+	font-size: 12px;
+	font-family: Arial, Helvetica, sans-serif;
+	border: 1px solid #59a5d8;
+	border-radius: 6px;
+	box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 8px;
+}
+
+#LightningRegistratorInfoPopup h3 {
+	margin: 0;
+	margin-bottom: 5px;
+	padding-bottom: 5px;
+	border-bottom: 1px solid #59a5d8;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorWarning {
+	background-color: #be7b16;
+	border: 1px solid #f7ae12;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorSuccess {
+	background-color: #0d9947;
+	border: 1px solid #2bc76c;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorFailure {
+	background-color: #b22f2f;
+	border: 1px solid #eb4343;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorWarning h3 {
+	border-color: #f7ae12;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorSuccess h3 {
+	border-color: #2bc76c;
+}
+
+#LightningRegistratorInfoPopup.LightningRegistratorFailure h3 {
+	border-color: #eb4343;
+}

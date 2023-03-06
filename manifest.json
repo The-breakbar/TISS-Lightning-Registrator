@@ -15,8 +15,12 @@
 			],
 			"js": [
 				"./content-scripts/getPageInfo.js",
+				"./content-scripts/infoMessage.js",
 				"./content-scripts/sendRegistration.js",
 				"./content-scripts/resultHandler.js"
+			],
+			"css": [
+				"./content-scripts/infoMessageStyle.css"
 			]
 		}
 	],

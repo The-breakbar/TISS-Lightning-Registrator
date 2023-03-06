@@ -65,6 +65,10 @@ let getTaskElement = (task) => {
 // Creates a countdown element for the given time
 let setCountdown = (element, time) => {
 	let countdown = Math.max(0, Math.round((time - Date.now()) / 1000));
-	element.textContent = `starting in ${countdown}s`;
-	if (countdown > 0) setTimeout(() => setCountdown(element, time), 1000);
+	if (countdown > 0) {
+		element.textContent = `starting in ${countdown}s`;
+		setTimeout(() => setCountdown(element, time), 1000);
+	} else {
+		element.textContent = "refreshing page...";
+	}
 };

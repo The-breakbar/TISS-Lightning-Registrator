@@ -42,8 +42,16 @@ registerButton.addEventListener("click", async () => {
 		}
 	}
 
+	// Disable the button and select elements
+	registerButton.disabled = true;
+	document.getElementById("option-select").disabled = true;
+	document.getElementById("slot-select").disabled = true;
+
+	// Show active registration info text
+	document.querySelector(`section[name="info"] p[name="active-registration"]`).hidden = false;
+
 	// Send the registration request to the content script
-	chrome.tabs.sendMessage(tabId, {
+	await chrome.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
 		timestamp: optionInfo.start,
@@ -64,12 +72,4 @@ registerButton.addEventListener("click", async () => {
 		expiry: Math.max(Date.now(), optionInfo.start) + TASK_EXPIRY
 	};
 	chrome.storage.session.set({ [tabId.toString()]: task });
-
-	// Disable the button and select elements
-	registerButton.disabled = true;
-	document.getElementById("option-select").disabled = true;
-	document.getElementById("slot-select").disabled = true;
-
-	// Show active registration info text
-	document.querySelector(`section[name="info"] p[name="active-registration"]`).hidden = false;
 });

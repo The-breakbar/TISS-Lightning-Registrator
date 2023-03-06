@@ -90,6 +90,9 @@ let getPage = async () => {
 	return pageDocument;
 };
 
+// Tab id is initialized with a register request, it is used by infoMessage.js to display the correct message
+let tabId;
+
 // This is the main callback that is run when the extension initiates the registration
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a registration request
@@ -101,7 +104,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 	// If the button is not found after the STOP_OFFSET specified time, the loop will stop
-	let { tabId, timestamp, optionId, slot } = message;
+	tabId = message.tabId;
+	let { timestamp, optionId, slot } = message;
 	let remainingTime = Math.max(0, timestamp - Date.now() - START_OFFSET);
 	setTimeout(async () => {
 		// Log the time when the loop started
