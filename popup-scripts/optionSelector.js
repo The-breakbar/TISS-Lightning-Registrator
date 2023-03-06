@@ -43,7 +43,12 @@ let initOptionSelector = async () => {
 	// If the options are valid, enable the option selector
 	optionSelect.disabled = false;
 
+	// If it's group options, determine if they have different block values
+	let differentBlocks = pageInfo.options.some((option) => option.block != pageInfo.options[0].block);
+
 	// Insert the registration options
+	let parent = optionSelect;
+	let lastBlock;
 	pageInfo.options.forEach((option) => {
 		// Create option element
 		let optElement = document.createElement("option");
@@ -53,8 +58,20 @@ let initOptionSelector = async () => {
 		// Add the date for exam options to be able to distinguish them
 		if (pageType == "exam") optElement.textContent += ` (${option.date})`;
 
-		// Add the option to the select
-		optionSelect.appendChild(optElement);
+		// Add the option to the select (with an optgroup if there are different blocks)
+		if (!differentBlocks) {
+			parent.appendChild(optElement);
+		} else {
+			// If the block is different, create a new optgroup
+			if (option.block != lastBlock) {
+				let optGroup = document.createElement("optgroup");
+				optGroup.label = option.block;
+				optionSelect.appendChild(optGroup);
+				parent = optGroup;
+			}
+			parent.appendChild(optElement);
+			lastBlock = option.block;
+		}
 	});
 };
 

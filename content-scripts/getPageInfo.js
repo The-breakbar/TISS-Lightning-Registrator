@@ -17,6 +17,7 @@
 //   option.registered: If the user is already registered for this option (boolean)
 //   option.id : Html id of the option (only for groups and exams)
 //   option.participants : Registered/available participants ("unlimited" if no limit)
+//   option.block : The name of the block to which the option belongs (only for groups)
 //   option.slots[] : Available timeslots for exams (only for exams, may be undefined) (array)
 //     option.slot.date : Date of slot
 //     option.slot.start : Start time of slot
@@ -113,6 +114,18 @@ let gatherPageInfo = () => {
 		} else if (pageType == "exam") {
 			let idElement = element.querySelector(`span[id*=members]`);
 			optionInfo.id = idElement.getAttribute("id").match(/examDateListForm:(.*):members/)[1];
+		}
+
+		// Get the block for group options
+		if (pageType == "group") {
+			// The block element is a h2 element
+			// Get the block element by iterating over all children of the parent element
+			// Track the last h2 element and use it as the block element if the current child is the option element
+			let lastH2;
+			element.parentElement.childNodes.forEach((child) => {
+				if (child.nodeName == "H2") lastH2 = child;
+				if (child == element) optionInfo.block = lastH2.textContent.trim();
+			});
 		}
 
 		// Get the timeslots by iterating over the list of option infos
