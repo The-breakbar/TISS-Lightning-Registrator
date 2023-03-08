@@ -1,7 +1,7 @@
 // This file handles the callback fo the register button, which sends the registration request to the content script
 // It also handles the enabling/disabling of the button and the display of info messages
 
-const TASK_EXPIRY = 30000;
+const TASK_EXPIRY = 70000;
 let registerButton = document.getElementById("register-button");
 
 // Listener for the option select, it enables the register button if all conditions are met

@@ -1,5 +1,5 @@
 // This is a content script responsible for handling the results of the registration attempts
-const TASK_EXPIRY = 30000;
+const TASK_EXPIRY = 60000;
 
 // Helper function to update the task in the session storage
 let updateTask = async (tabId, update) => {

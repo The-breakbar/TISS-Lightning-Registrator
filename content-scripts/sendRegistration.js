@@ -69,7 +69,7 @@
 
 // Define general registration parameters
 const START_OFFSET = 30000; // How many ms before the timestamp the refresh loop should start
-const STOP_OFFSET = 20000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
+const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
