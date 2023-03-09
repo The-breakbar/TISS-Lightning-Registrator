@@ -23,7 +23,6 @@
 body {
 	margin: 0;
 	font-family: "Noto Sans", "Segoe UI", Arial, sans-serif;
-	color: var(--text-color);
 }
 
 a {
@@ -33,6 +32,7 @@ a {
 main {
 	width: 300px;
 	background-color: var(--background);
+	color: var(--text-color);
 	cursor: default;
 	user-select: none;
 }
@@ -54,16 +54,24 @@ button:active {
 }
 
 /* Top header bar */
-h1 {
-	margin: 0;
-	padding: 10px;
+header {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	
 	background-color: var(--header);
 	color: var(--text-color);
 	text-align: center;
+	box-shadow: var(--shadow-strong);
+}
+
+h1 {
+	padding: 10px 4px;
+	display: inline-block;
+	margin: 0;
 	text-transform: uppercase;
 	font-size: 18px;
 	font-weight: normal;
-	box-shadow: var(--shadow-strong);
 }
 
 /* Sections and their elements */
@@ -240,4 +248,10 @@ footer {
 .failure {
 	background-color: var(--failure);
 	border: 1px solid var(--failure-border);
+}
+
+img {
+	height: 34px;
+	vertical-align: middle;
+	pointer-events: none;
 }
