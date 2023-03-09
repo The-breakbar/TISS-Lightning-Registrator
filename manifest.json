@@ -1,6 +1,6 @@
 {
 	"name": "TISS Lightning Registrator",
-	"description": "TISS Lightning Registrator",
+	"description": "Automatically register in TISS",
 	"version": "1.0.0",
 	"manifest_version": 3,
 	"action": {
