@@ -30,3 +30,7 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 The extension simulates the HTTP requests that are normally sent when a user registers for something. It is based on a reverse-engineer of the internal TISS API, which is used by the TISS website. Unlike in a browser, the extension can register as soon as it receives a response from the server, instead of waiting for the rest of the page to load. This allows it to register faster than a human user.
 
 As the extension is based on internal APIs, any changes to the TISS website in the future may break the extension.
+
+# Bug reports
+
+All bug reports are appreciated! If you find any bugs, you can report them in the [issues](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues). Error messages can be found in the console of the tab where the registration ran. There might also be an "Errors" button on the settings page where the extension was installed. It contains errors from the pop-up, as those are not logged to the regular console.
