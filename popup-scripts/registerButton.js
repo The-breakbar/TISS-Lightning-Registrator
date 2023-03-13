@@ -11,7 +11,7 @@ document.getElementById("option-select").addEventListener("change", () => {
 
 	// Display a warning if the registration date is more than 10 days in the future
 	let moreThan10Days = optionInfo.start > new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-	document.querySelector(`section[name="info"] p[name="long-wait"]`).hidden = !moreThan10Days;
+	document.getElementById("info-long-wait").hidden = !moreThan10Days;
 
 	// Disable the button if the option has slots or the registration date is more than 10 days in the future
 	registerButton.disabled = moreThan10Days || optionInfo.slots;
@@ -48,7 +48,7 @@ registerButton.addEventListener("click", async () => {
 	document.getElementById("slot-select").disabled = true;
 
 	// Show active registration info text
-	document.querySelector(`section[name="info"] p[name="active-registration"]`).hidden = false;
+	document.getElementById("info-active-registration").hidden = false;
 
 	// Send the registration request to the content script
 	await chrome.tabs.sendMessage(tabId, {

@@ -4,6 +4,7 @@
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700" />
 		<link rel="stylesheet" href="styles.css" />
 	</head>
+
 	<body>
 		<main>
 			<header>
@@ -12,21 +13,24 @@
 			</header>
 
 			<section name="info">
-				<p class="info-text info" name="wrong-url">
+				<p hidden class="info-text warning" id="info-time-offset">
+					Your computer's time differs from the TISS server's time by more than 30 seconds. Please synchronize it in the settings to avoid registration errors.
+				</p>
+				<p class="info-text info" id="info-wrong-url">
 					Navigate to any LVA/group/exam registration page on
 					<a target="_blank" href="https://tiss.tuwien.ac.at/education/favorites.xhtml">TISS</a>
 					to start a registration.
 				</p>
-				<p hidden class="info-text info" name="page-load">Waiting for the page to load...</p>
-				<p hidden class="info-text info" name="active-registration">
+				<p hidden class="info-text info" id="info-page-load">Waiting for the page to load...</p>
+				<p hidden class="info-text info" id="info-active-registration">
 					Registrations run in the background, you can change tabs/windows. Closing or updating a tab will cancel the registration for that tab.
 				</p>
-				<p hidden class="info-text info" name="no-options">There are no valid registration options available on this page.</p>
-				<p hidden class="info-text info" name="ongoing-task">
+				<p hidden class="info-text info" id="info-no-options">There are no valid registration options available on this page.</p>
+				<p hidden class="info-text info" id="info-ongoing-task">
 					There is already an ongoing registration in this tab. Please open a new tab if you'd like to start a new one.
 				</p>
-				<p hidden class="info-text warning" name="long-wait">
-					This registration option will only open in multiple days, a registration shouldn't be started more than an hour before it opens.
+				<p hidden class="info-text warning" id="info-long-wait">
+					This registration option will only open after multiple days, a registration shouldn't be started more than an hour before it opens.
 				</p>
 			</section>
 

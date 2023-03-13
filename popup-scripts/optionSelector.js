@@ -16,7 +16,7 @@ let initOptionSelector = async () => {
 	let finished = ongoingTask?.status == "success" || ongoingTask?.status == "failure";
 	if (ongoingTask && !finished) {
 		// Show a message
-		document.querySelector(`section[name="info"] p[name="ongoing-task"]`).hidden = false;
+		document.getElementById("info-ongoing-task").hidden = false;
 		return;
 	}
 
@@ -36,7 +36,7 @@ let initOptionSelector = async () => {
 
 	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {
-		document.querySelector(`section[name="info"] p[name="no-options"]`).hidden = false;
+		document.getElementById("info-no-options").hidden = false;
 		return;
 	}
 

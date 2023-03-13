@@ -18,8 +18,8 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	else if (/examDate/.test(tabUrl)) pageType = "exam";
 
 	// Switch the info text from "wrong url" to "loading"
-	document.querySelector(`section[name="info"] p[name="wrong-url"]`).hidden = true;
-	document.querySelector(`section[name="info"] p[name="page-load"]`).hidden = false;
+	document.getElementById("info-wrong-url").hidden = true;
+	document.getElementById("info-page-load").hidden = false;
 
 	// Get the page info from the content script
 	// This is necessary because the popup can be opened before the content script has loaded
@@ -29,7 +29,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	}
 
 	// Hide loading text
-	document.querySelector(`section[name="info"] p[name="page-load"]`).hidden = true;
+	document.getElementById("info-page-load").hidden = true;
 
 	// Option selector is handled in optionSelector.js
 	initOptionSelector();
