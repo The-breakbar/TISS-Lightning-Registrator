@@ -46,7 +46,7 @@
 //  javax.faces.ViewState : A valid ViewState (see below)
 
 // All of the above endpoints return the a body containing the confirmation page
-// Note that a 200 doesn't mean the first request was successful, as it can also be a redirect to a TISS error page
+// Note that a 200 doesn't mean the request was successful, it also has to be checked if the response doesn't contain a redirect
 // The confirmation page may contain the slot selection options for exams with slots
 // The ViewState that is found in the response has to be used for the confirmation request
 
@@ -68,7 +68,7 @@
 // The response to the first registration request will contain a new ViewState, which can be used for the confirmation request
 
 // Define general registration parameters
-const START_OFFSET = 30000; // How many ms before the timestamp the refresh loop should start
+const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
 
