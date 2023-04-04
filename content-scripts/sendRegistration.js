@@ -21,24 +21,27 @@
 // Every request has to have these 3 session cookies: _tiss_session, TISS_AUTH, JSESSIONID
 // The cookies generally do not change during the session, except for JSESSIONID, which has been observed to change when bad requests were sent
 
-// /education/course/courseRegistration.xhtml
-// This endpoint is used to get the confirmation page of lva registrations and requires the following POST data:
+// All body parameters are the same as the ones which are sent by the browser when the corresponding button is clicked
+// Some parameters are not required, but are included for completeness
+
+// /education/course/courseRegistration.xhtml (POST)
+// This endpoint is used to get the confirmation page of lva registrations and requires the following body:
 //  registrationForm:j_id_6t : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the register button)
 //  registrationForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
 //  javax.faces.ViewState : A valid ViewState (see below)
 
-// /education/course/groupList.xhtml
-// This endpoint is used to get the confirmation page of group registrations and requires the following POST data:
+// /education/course/groupList.xhtml (POST)
+// This endpoint is used to get the confirmation page of group registrations and requires the following body:
 //  groupContentForm:<id>:j_id_a1 : "Register" ("Anmelden" is also valid) (the id in the key is from the html ids of the option, see getPageInfo.js)
 //  groupContentForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
 //  javax.faces.ClientWindow : Same value as dspwid
 //  javax.faces.ViewState : A valid ViewState (see below)
 
-// /education/course/examDateList.xhtml
-// This endpoint is used to get the confirmation page of exam registrations and requires the following POST data:
+// /education/course/examDateList.xhtml (POST)
+// This endpoint is used to get the confirmation page of exam registrations and requires the following body:
 //  examDateListForm:<id>:j_id_9u : "Register" ("Anmelden" is also valid) (the id in the key is from the html ids of the option, see getPageInfo.js)
 //  examDateListForm_SUBMIT : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)
@@ -46,13 +49,13 @@
 //  javax.faces.ViewState : A valid ViewState (see below)
 
 // All of the above endpoints return the a body containing the confirmation page
-// Note that a 200 doesn't mean the request was successful, it also has to be checked if the response doesn't contain a redirect
+// Note that a 200 doesn't mean the request was successful, as the response can also be a redirect
 // The confirmation page may contain the slot selection options for exams with slots
 // The ViewState that is found in the response has to be used for the confirmation request
 
-// /education/course/register.xhtml
+// /education/course/register.xhtml (POST)
 // This endpoint is used to confirm the registration, has to be called after one of the lva/group/exam endpoints was called
-// It requires the following POST data:
+// It requires the following body:
 //  regForm:j_id_30 : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the confirm button)
 //  regForm_Submit : "1"
 //  dspwid : A window id (found in the url as "dswid" or in the page)

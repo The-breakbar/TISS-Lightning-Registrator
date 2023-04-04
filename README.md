@@ -10,7 +10,7 @@ TISS Lightning Registrator is a browser extension that automatically registers f
 
 As registrations don't open regularly, to try the extension out, it can also be used to register for an LVA/group/exam which has already opened.
 
-# Installing
+# Installing / Updating
 
 The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc). A Firefox version will be added after the full release. The extension is not available on the Chrome Web Store, it has to be installed manually with the following steps:
 
@@ -27,7 +27,7 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 
 # How it works
 
-The extension simulates the HTTP requests that are normally sent when a user registers for something. It is based on a reverse-engineer of the internal TISS API, which is used by the TISS website. Unlike in a browser, the extension can register as soon as it receives a response from the server, instead of waiting for the rest of the page to load. This allows it to register faster than a human user.
+The extension simulates the HTTP requests that are normally sent when a user registers for something. It is based on a reverse-engineer of the internal TISS API, which is used by the TISS website. Unlike in a browser, the extension can register as soon as it receives a response from the server, instead of waiting for the rest of the page to load. This allows it to register faster than a human user. If you are interested, you can read more about the development of the extension [here](DEVELOPMENT.md).
 
 As the extension is based on internal APIs, any changes to the TISS website in the future may break the extension.
 
