@@ -75,6 +75,7 @@
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
+const MAX_REFRESH_INTERVAL = 0; // How often the page should be refreshed in ms (requests are sent at a maximum interval of 500ms, to avoid sending too many requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
@@ -107,20 +108,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
+	// Requests are sent at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
 	// If the button is not found after the STOP_OFFSET specified time, the loop will stop
 	tabId = message.tabId;
 	let { timestamp, optionId, slot, timeOverride } = message;
 	let currentTime = timeOverride || Date.now();
-	console.log(currentTime - Date.now());
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 	setTimeout(async () => {
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
 
 		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
-		while (Date.now() < stopTime) {
+		let lastIteration;
+
+		// Recursive function to refresh at most every MAX_REFRESH_INTERVAL ms
+		let refreshLoopIteration = async () => {
 			// Log that a refresh is being attempted
-			console.log("Refreshing page...");
+			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page...");
+			lastIteration = Date.now();
 
 			// Refresh the page and check if the button is on the page
 			let pageDocument = await getPage();
@@ -136,13 +141,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				registerLoop(viewState);
 				return;
 			}
-		}
 
-		// Log that the refresh loop timed out
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
+			// If the stop time is reached, stop the loop
+			if (Date.now() > stopTime) {
+				// Log that the refresh loop timed out
+				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
 
-		// Timeout is handled in resultHandler.js
-		handleRefreshTimeout(tabId);
+				// Timeout is handled in resultHandler.js
+				handleRefreshTimeout(tabId);
+				return;
+			}
+
+			// Check if the last iteration was less than MAX_REFRESH_INTERVAL ms ago, if so wait until it has
+			let timeSinceLastIteration = Math.abs(Date.now() - lastIteration);
+			if (timeSinceLastIteration < MAX_REFRESH_INTERVAL) {
+				setTimeout(refreshLoopIteration, MAX_REFRESH_INTERVAL - timeSinceLastIteration);
+			} else {
+				refreshLoopIteration();
+			}
+		};
+
+		// Start the refresh loop
+		refreshLoopIteration();
 	}, remainingTime);
 
 	// This function is called when the first valid ViewState is obtained
@@ -158,7 +178,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
 
 		// Update the status of the registration task
-		// TODO: Move elsewhere
+		// This is a possible race condition for a visual bug, however the requests would have to be faster than the updating (which is highly unlikely)
 		let updateTask = async () => {
 			let task;
 			while (!task) {
