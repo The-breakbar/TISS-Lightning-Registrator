@@ -34,24 +34,3 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	// Option selector is handled in optionSelector.js
 	initOptionSelector();
 });
-
-// Check if the user's local time differs more than 30 seconds from the server time, and show a warning if so
-// This is necessary, because if the difference is too big, the registration will start too early/late
-// This is not a perfect solution, if the request fails, then the time is not checked
-// However this info notice itself should only very rarely be shown, most system clocks don't deviate that much
-fetch("http://worldtimeapi.org/api/timezone/Europe/Vienna")
-	.then((response) => {
-		if (!response.ok) return;
-
-		// If response is fine, extract the timestamp
-		response.json().then((data) => {
-			let currentTime = Date.now();
-			let serverTime = data.unixtime; // The serverTime is received in seconds
-
-			let timeDifference = Math.abs(currentTime - serverTime * 1000);
-			if (timeDifference > 30000) {
-				document.getElementById("info-time-difference").hidden = false;
-			}
-		});
-	})
-	.catch(() => {});

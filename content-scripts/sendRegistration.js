@@ -12,6 +12,7 @@
 //  timestamp: Timestamp of when the requests should start sending in milliseconds
 //  optionId: Id of the option, starting from the first "j_id" until the colon and number (e.g. "j_id_52:0:j_id_5d:j_id_5g:0") (only for group and exam)
 //  slot: A two string array containing the slot start and end time (e.g. ["10:00", "10:30"]) (only for exam)
+//  timeOverride: Optional, if the time difference is too big between the user's local time and the time from worldtimeapi.org, this can be used to override the time
 // }
 
 // After the registration attempts are done, the result is processed in the resultHandler.js script
@@ -108,8 +109,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 	// If the button is not found after the STOP_OFFSET specified time, the loop will stop
 	tabId = message.tabId;
-	let { timestamp, optionId, slot } = message;
-	let remainingTime = Math.max(0, timestamp - Date.now() - START_OFFSET);
+	let { timestamp, optionId, slot, timeOverride } = message;
+	let currentTime = timeOverride || Date.now();
+	console.log(currentTime - Date.now());
+	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 	setTimeout(async () => {
 		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
