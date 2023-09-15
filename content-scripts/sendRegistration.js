@@ -75,7 +75,7 @@
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
-const MAX_REFRESH_INTERVAL = 0; // How often the page should be refreshed in ms (requests are sent at a maximum interval of 500ms, to avoid sending too many requests)
+const MAX_REFRESH_INTERVAL = 500; // How often the page should be refreshed in ms (requests are sent at a maximum interval of 500ms, to avoid sending too many requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
@@ -100,148 +100,134 @@ let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	// Check if the message is a registration request
 	if (message.action != "sendRegistration") return;
-
-	// Log the time when the message was received
 	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Received registration request...");
 
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
-	// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
-	// Requests are sent at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
-	// If the button is not found after the STOP_OFFSET specified time, the loop will stop
+	// This will start the refresh loop, which will then start the register loop
 	tabId = message.tabId;
 	let { timestamp, optionId, slot, timeOverride } = message;
 	let currentTime = timeOverride || Date.now();
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
+
 	setTimeout(async () => {
-		// Log the time when the loop started
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
 
-		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
-		let lastIteration;
-
-		// Recursive function to refresh at most every MAX_REFRESH_INTERVAL ms
-		let refreshLoopIteration = async () => {
-			// Log that a refresh is being attempted
-			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page...");
-			lastIteration = Date.now();
-
-			// Refresh the page and check if the button is on the page
-			let pageDocument = await getPage();
-			let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
-
-			let button;
-			if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
-			else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
-
-			// If the button was found, extract the ViewState, stop the refresh loop and start the register loop
-			if (button) {
-				let viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
-				registerLoop(viewState);
-				return;
-			}
-
-			// If the stop time is reached, stop the loop
-			if (Date.now() > stopTime) {
-				// Log that the refresh loop timed out
-				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
-
-				// Timeout is handled in resultHandler.js
-				handleRefreshTimeout(tabId);
-				return;
-			}
-
-			// Check if the last iteration was less than MAX_REFRESH_INTERVAL ms ago, if so wait until it has
-			let timeSinceLastIteration = Math.abs(Date.now() - lastIteration);
-			if (timeSinceLastIteration < MAX_REFRESH_INTERVAL) {
-				setTimeout(refreshLoopIteration, MAX_REFRESH_INTERVAL - timeSinceLastIteration);
-			} else {
-				refreshLoopIteration();
-			}
-		};
-
 		// Start the refresh loop
-		refreshLoopIteration();
+		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
+		refreshLoop(stopTime, optionId, slot);
 	}, remainingTime);
-
-	// This function is called when the first valid ViewState is obtained
-	// It attempts to send the registration request until it succeeds or the maxAttempts is reached
-	// The requests are currently sent in series, for the following reasons:
-	// - Multiple requests at once will only get a response from the server one at a time, and might possibly also slow down the response rate
-	// - It is generally expected that the first request succeeds, as it almost always does, the other attempts are just incase something unexpected happens
-	// - While sending many requests at once, it has been observed that the response is an error, even if the registration was successfully processed internally
-	//   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
-	// The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
-	let registerLoop = async (firstViewState) => {
-		// Log the time when the page starts being refreshed
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
-
-		// Update the status of the registration task
-		// This is a possible race condition for a visual bug, however the requests would have to be faster than the updating (which is highly unlikely)
-		let updateTask = async () => {
-			let task;
-			while (!task) {
-				task = (await chrome.storage.session.get(tabId.toString()))[tabId];
-			}
-			if (task.status == "queued") {
-				task.status = "running";
-				chrome.storage.session.set({ [tabId]: task });
-			}
-		};
-		updateTask();
-
-		// Request loop
-		let attempts = 0;
-		let viewState = firstViewState;
-		let response;
-		let timeStart = Date.now();
-
-		while (attempts < MAX_ATTEMPTS && !response) {
-			attempts++;
-
-			// Attempt to send the requests
-			try {
-				// View state is already valid for first request
-				if (attempts > 1) {
-					// Log the time
-					console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing for new ViewState...");
-
-					// Refresh the page and get the ViewState
-					viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
-				}
-
-				// Throws an error here if the request fails in any way
-				response = await sendRequest(viewState, optionId, slot);
-
-				// Log success
-				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration success with attempt number " + attempts);
-			} catch (error) {
-				// Log the error
-				console.error(error);
-				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
-			}
-		}
-
-		// Calculate the time it took to finish the loop
-		let time = Date.now() - timeStart;
-
-		// Log the time it took to send the requests
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + ` - Registration loop finished (${time}ms)`);
-
-		// Result is handled in resultHandler.js
-		handleResult({
-			response,
-			tabId,
-			attempts,
-			time,
-			optionId
-		});
-	};
 
 	// Close the message connection
 	sendResponse();
 });
+
+// Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
+// Requests are sent in series at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
+// If the button is not found after the STOP_OFFSET specified time, the loop will stop
+let refreshLoop = async (stopTime, optionId, slot) => {
+	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page...");
+	let refreshStart = Date.now();
+
+	// Refresh the page and check if the button is on the page
+	let pageDocument = await getPage();
+	let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+
+	let button;
+	if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
+	else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
+
+	// If the button was found, extract the ViewState, stop the refresh loop and start the register loop
+	if (button) {
+		let viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+		registerLoop(viewState, optionId, slot);
+		return;
+	}
+
+	// If the stop time is reached, stop the loop
+	if (Date.now() > stopTime) {
+		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
+
+		// Timeout is handled in resultHandler.js
+		handleRefreshTimeout(tabId);
+		return;
+	}
+
+	// If needed, wait for the next iteration
+	let timeLeft = Math.max(0, MAX_REFRESH_INTERVAL - (Date.now() - refreshStart)); // Date.now() - refreshStart is the time it took to refresh the page
+	setTimeout(refreshLoop, timeLeft);
+};
+
+// Updates the status of the registration task
+// This is a possible race condition for a visual bug, however the requests would have to be faster than the updating (which is highly unlikely)
+let updateTaskToRunning = async () => {
+	let task;
+	while (!task) {
+		task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+	}
+	if (task.status == "queued") {
+		task.status = "running";
+		chrome.storage.session.set({ [tabId]: task });
+	}
+};
+
+// This function is called when the first valid ViewState is obtained
+// It attempts to send the registration request until it succeeds or the maxAttempts is reached
+// The requests are currently sent in series, for the following reasons:
+// - Multiple requests at once will only get a response from the server one at a time, and might possibly also slow down the response rate
+// - It is generally expected that the first request succeeds, as it almost always does, the other attempts are just incase something unexpected happens
+// - While sending many requests at once, it has been observed that the response is an error, even if the registration was successfully processed internally
+//   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
+// The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
+let registerLoop = async (firstViewState, optionId, slot) => {
+	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
+
+	// Update the status of the registration task
+	updateTaskToRunning();
+
+	// Request loop
+	let attempts = 0;
+	let viewState = firstViewState;
+	let response;
+	let timeStart = Date.now();
+
+	while (attempts < MAX_ATTEMPTS && !response) {
+		attempts++;
+
+		// Attempt to send the requests
+		try {
+			// View state is already valid for first request
+			if (attempts > 1) {
+				// Refresh the page and get the ViewState
+				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing for new ViewState...");
+				viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
+			}
+
+			// Throws an error here if the request fails in any way
+			response = await sendRequest(viewState, optionId, slot);
+
+			// Reaching this point means the request succeeded
+			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration success with attempt number " + attempts);
+		} catch (error) {
+			// This is for the very rare case that the request fails, due to unknown reasons
+			// At this point the loop will just try again, however generally at this point the other requests will also fail
+			console.error(error);
+			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
+		}
+	}
+
+	// Pass of result to resultHandler.js
+	let time = Date.now() - timeStart;
+	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + ` - Registration loop finished (${time}ms)`);
+
+	handleResult({
+		response,
+		tabId,
+		attempts,
+		time,
+		optionId
+	});
+};
 
 // Define the endpoints and POST data for the requests
 const LVA_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/courseRegistration.xhtml";
@@ -303,10 +289,8 @@ let sendRequest = async (viewState, optionId, slot) => {
 		body: new URLSearchParams(body).toString() // Encode the body as a query string
 	};
 
-	// Log the time when the first request is sent
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending register request with body: ", body);
-
 	// Send the first request
+	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending register request with body: ", body);
 	let firstResponse = await fetch(targetUrl, payload);
 	validateResponse(firstResponse);
 	let pageDocument = new DOMParser().parseFromString(await firstResponse.text(), "text/html");
@@ -324,10 +308,8 @@ let sendRequest = async (viewState, optionId, slot) => {
 	// Update the body with the new data and encode it
 	payload.body = new URLSearchParams({ ...bodyData, ...CONFIRM_DATA }).toString();
 
-	// Log the time when the second request is sent
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending confirm request with body: ", { ...bodyData, ...CONFIRM_DATA });
-
 	// Send the second request
+	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending confirm request with body: ", { ...bodyData, ...CONFIRM_DATA });
 	let secondResponse = await fetch(CONFIRM_ENDPOINT, payload);
 	validateResponse(secondResponse);
 
