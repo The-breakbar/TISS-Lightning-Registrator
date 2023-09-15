@@ -19,29 +19,58 @@ let updateTask = async (tabId, update) => {
 let handleResult = async (message) => {
 	let { response, tabId, attempts, time, optionId } = message;
 
-	// Get the count of already registered students
-	let pageDocument = await getPage();
-	let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
-	let numberString = Array.from(options)
-		.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
-		.querySelector(`span[id*="members"]`).innerText;
-	let number = numberString.split("/")[0].trim();
-
-	if (response) {
-		console.log("Registered as number " + number);
-	} else {
+	// Check if the registration loop received a response
+	if (!response) {
 		console.log("Registration failed");
+		let update = {
+			status: "failure",
+			expiry: Date.now() + TASK_EXPIRY,
+			time,
+			error: `registration attempted ${attempts} times`
+		};
+		updateTask(tabId, update);
+
+		return;
 	}
 
-	// Update the task in the session storage
+	// At this point we still assume that the registration was not successful, as we have to check the response message
+	let success = false;
+	let errorMessage = "unable to register for this option";
+	let responseDocument = new DOMParser().parseFromString(response, "text/html");
+	let responseInfoText = responseDocument.querySelector("#confirmForm .staticInfoMessage").innerText;
+
+	// Check if the registration wasn't fast enough and ended up on the waiting list
+	if (/(warteliste|waiting list)/i.test(responseInfoText)) {
+		errorMessage = "on waiting list";
+	}
+
+	// Check if the response message contains the success message
+	// The most reasonable way for check this is string matching, as it is just an info message
+	if (/(sie wurden erfolgreich zur.*angemeldet|you successfully registered for)/i.test(responseInfoText)) {
+		success = true;
+	}
+
+	// Get the count of already registered students
+	let number;
+	if (success) {
+		let pageDocument = await getPage();
+		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+		let numberString = Array.from(options)
+			.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
+			.querySelector(`span[id*="members"]`).innerText;
+
+		number = numberString.split("/")[0].trim();
+		console.log("Registered as number " + number);
+	}
+
+	// Update the task to success
 	let update = {
-		status: response ? "success" : "failure",
+		status: success ? "success" : "failure",
 		expiry: Date.now() + TASK_EXPIRY,
 		number,
 		time,
-		error: response ? undefined : "registration attempted " + attempts + " times"
+		error: errorMessage
 	};
-
 	updateTask(tabId, update);
 };
 

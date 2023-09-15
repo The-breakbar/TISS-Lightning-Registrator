@@ -207,7 +207,8 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 			response = await sendRequest(viewState, optionId, slot);
 
 			// Reaching this point means the request succeeded
-			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration success with attempt number " + attempts);
+			// (Note that this doesn't mean the registration was successful, as the response has to be checked)
+			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration request finished with attempt " + attempts);
 		} catch (error) {
 			// This is for the very rare case that the request fails, due to unknown reasons
 			// At this point the loop will just try again, however generally at this point the other requests will also fail

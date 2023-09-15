@@ -38,7 +38,7 @@ chrome.storage.onChanged.addListener((changes, area) => {
 	} else if (task.status == "success") {
 		message.textContent = `Refresh the page to see`;
 	} else if (task.status == "failure") {
-		message.textContent = `Error: ${task.error}`;
+		message.textContent = `${task.error.charAt(0).toUpperCase()}${task.error.slice(1)}`;
 	} else if (task.status == "running") {
 		message.textContent = `Sending registration`;
 	}
