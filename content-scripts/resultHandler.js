@@ -35,6 +35,7 @@ let handleResult = async (message) => {
 
 	// At this point we still assume that the registration was not successful, as we have to check the response message
 	let success = false;
+	let preregistration = false;
 	let errorMessage = "unable to register for this option";
 	let responseDocument = new DOMParser().parseFromString(response, "text/html");
 	let responseInfoText = responseDocument.querySelector("#confirmForm .staticInfoMessage").innerText;
@@ -50,6 +51,20 @@ let handleResult = async (message) => {
 		success = true;
 	}
 
+	// Check if the info message says that you are already registered
+	// This is just to avoid showing a failure message if this info message is shown
+	if (/(Ist bereits Gruppenmitglied|Already group member)/i.test(responseInfoText)) {
+		success = true;
+	}
+
+	// Check if the registration was a pre-registration
+	if (
+		/(Anmeldewunsch.*wurde erfasst.*Erst nach Bestätigung durch|registration request for.*has been recorded.*registration needs to be confirmed)/i.test(responseInfoText)
+	) {
+		success = true;
+		preregistration = true;
+	}
+
 	// Get the count of already registered students
 	let number;
 	if (success) {
@@ -57,7 +72,7 @@ let handleResult = async (message) => {
 		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
 		let numberString = Array.from(options)
 			.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
-			.querySelector(`span[id*="members"]`).innerText;
+			.querySelector(`span[id*="${preregistration ? "waitingList" : "members"}"]`).innerText;
 
 		number = numberString.split("/")[0].trim();
 		console.log("Registered as number " + number);

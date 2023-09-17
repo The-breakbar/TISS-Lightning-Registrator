@@ -74,18 +74,17 @@
 // Define general registration parameters
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
-const MAX_ATTEMPTS = 5; // Maximum number of attempts to send the register request (note that a single registration request consists of a refresh and two POST requests)
+const MAX_ATTEMPTS = 3; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
 const MAX_REFRESH_INTERVAL = 500; // How often the page should be refreshed in ms (requests are sent at a maximum interval of 500ms, to avoid sending too many requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
 // The dsrid value can be any 3-digit number, but the ClientWindow id has to be the same as the one in the url
 // The cookie is set with a fixed value, to avoid creating an unnecessary amount of cookies
-// (note that the cookie name is "dsrwid", not "dsrid" as in the url)
 let windowId;
 if (document.location.href.includes("dswid")) windowId = document.location.href.match(/dswid=(\d*)/)[1]; // The window handler page may not have the id
 const DSRID_VALUE = 1;
-document.cookie = `dsrwid-${DSRID_VALUE}=${windowId}`;
+document.cookie = `dsrwid-${DSRID_VALUE}=${windowId}`; // note that the cookie name is "dsrwid", not "dsrid" as in the url
 
 // This function "refreshes" the page with a GET request and returns a the document of the response
 // The url is modified to include the dsrid value that was set in the cookie
