@@ -124,7 +124,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 // Requests are sent in series at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
-// If the button is not found after the STOP_OFFSET specified time, the loop will stop
+// If the button is not found after the specified time, the loop will stop
 let refreshLoop = async (stopTime, optionId, slot) => {
 	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page...");
 	let refreshStart = Date.now();
@@ -155,7 +155,9 @@ let refreshLoop = async (stopTime, optionId, slot) => {
 
 	// If needed, wait for the next iteration
 	let timeLeft = Math.max(0, MAX_REFRESH_INTERVAL - (Date.now() - refreshStart)); // Date.now() - refreshStart is the time it took to refresh the page
-	setTimeout(refreshLoop, timeLeft);
+	setTimeout(() => {
+		refreshLoop(stopTime, optionId, slot);
+	}, timeLeft);
 };
 
 // Updates the status of the registration task
