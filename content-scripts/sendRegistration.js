@@ -97,10 +97,15 @@ let getPage = async () => {
 // Tab id is initialized with a register request, it is used by infoMessage.js to display the correct message
 let tabId;
 
+// Utility function to log the time with milliseconds
+let logExactTime = (...message) => {
+	console.log(`${new Date().toLocaleTimeString()}.${new Date().getMilliseconds().toString().padStart(3, "0")} -`, ...message);
+};
+
 // This is the main callback that is run when the extension initiates the registration
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action != "sendRegistration") return;
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Received registration request...");
+	logExactTime("Received registration request...");
 
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// This will start the refresh loop, which will then start the register loop
@@ -113,12 +118,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// This is done to avoid having to login again, as the session expires after a certain amount of time
 	// The refresh is done in the background, so it doesn't interfere with the registration
 	let sessionRefresh = setInterval(() => {
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page to keep session alive...");
+		logExactTime("Refreshing page to keep session alive...");
 		getPage();
 	}, 30 * 60 * 1000);
 
 	setTimeout(async () => {
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
+		logExactTime("Starting refresh loop...");
 
 		// Clear the session refresh interval
 		clearInterval(sessionRefresh);
@@ -136,7 +141,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // Requests are sent in series at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
 // If the button is not found after the specified time, the loop will stop
 let refreshLoop = async (stopTime, optionId, slot) => {
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page...");
+	logExactTime("Refreshing page...");
 	let refreshStart = Date.now();
 
 	// Refresh the page and check if the button is on the page
@@ -156,7 +161,7 @@ let refreshLoop = async (stopTime, optionId, slot) => {
 
 	// If the stop time is reached, stop the loop
 	if (Date.now() > stopTime) {
-		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refresh loop timed out, no button found...");
+		logExactTime("Refresh loop timed out, no button found...");
 
 		// Timeout is handled in resultHandler.js
 		handleRefreshTimeout(tabId);
@@ -192,7 +197,7 @@ let updateTaskToRunning = async () => {
 //   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
 // The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
 let registerLoop = async (firstViewState, optionId, slot) => {
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Valid ViewState obtained, starting register loop...");
+	logExactTime("Valid ViewState obtained, starting register loop...");
 
 	// Update the status of the registration task
 	updateTaskToRunning();
@@ -211,7 +216,7 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 			// View state is already valid for first request
 			if (attempts > 1) {
 				// Refresh the page and get the ViewState
-				console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing for new ViewState...");
+				logExactTime("Refreshing for new ViewState...");
 				viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
 			}
 
@@ -220,18 +225,18 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 
 			// Reaching this point means the request succeeded
 			// (Note that this doesn't mean the registration was successful, as the response has to be checked)
-			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Registration request finished with attempt " + attempts);
+			logExactTime("Registration request finished with attempt " + attempts);
 		} catch (error) {
 			// This is for the very rare case that the request fails, due to unknown reasons
 			// At this point the loop will just try again, however generally at this point the other requests will also fail
-			console.log(error.message);
-			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
+			logExactTime(error.message);
+			logExactTime(`Attempt number ${attempts} failed`);
 		}
 	}
 
 	// Pass of result to resultHandler.js
 	let time = Date.now() - timeStart;
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + ` - Registration loop finished (${time}ms)`);
+	logExactTime(`Registration loop finished (${time}ms)`);
 
 	handleResult({
 		response,
@@ -303,7 +308,7 @@ let sendRequest = async (viewState, optionId, slot) => {
 	};
 
 	// Send the first request
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending register request with body: ", body);
+	logExactTime("Sending register request with body: ", body);
 	let firstResponse = await fetch(targetUrl, payload);
 	validateResponse(firstResponse);
 	let pageDocument = new DOMParser().parseFromString(await firstResponse.text(), "text/html");
@@ -322,7 +327,7 @@ let sendRequest = async (viewState, optionId, slot) => {
 	payload.body = new URLSearchParams({ ...bodyData, ...CONFIRM_DATA }).toString();
 
 	// Send the second request
-	console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Sending confirm request with body: ", { ...bodyData, ...CONFIRM_DATA });
+	logExactTime("Sending confirm request with body: ", { ...bodyData, ...CONFIRM_DATA });
 	let secondResponse = await fetch(CONFIRM_ENDPOINT, payload);
 	validateResponse(secondResponse);
 
