@@ -227,6 +227,7 @@ footer {
 	font-size: 11px;
 	padding: 5px;
 	background-color: var(--primary);
+	box-shadow: var(--shadow);
 }
 
 /* Colors for the different statuses */
