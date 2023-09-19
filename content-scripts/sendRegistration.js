@@ -75,7 +75,7 @@
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 3; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
-const MAX_REFRESH_INTERVAL = 500; // How often the page should be refreshed in ms (requests are sent at a maximum interval of 500ms, to avoid sending too many requests)
+const MAX_REFRESH_INTERVAL = 300; // How often the page should be refreshed in ms (requests are sent at a maximum interval, to avoid sending too many requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
@@ -109,8 +109,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	let currentTime = timeOverride || Date.now();
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 
+	// Refresh the page every 30 minutes to keep the session alive
+	// This is done to avoid having to login again, as the session expires after a certain amount of time
+	// The refresh is done in the background, so it doesn't interfere with the registration
+	let sessionRefresh = setInterval(() => {
+		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Refreshing page to keep session alive...");
+		getPage();
+	}, 30 * 60 * 1000);
+
 	setTimeout(async () => {
 		console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Starting refresh loop...");
+
+		// Clear the session refresh interval
+		clearInterval(sessionRefresh);
 
 		// Start the refresh loop
 		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
@@ -213,7 +224,7 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 		} catch (error) {
 			// This is for the very rare case that the request fails, due to unknown reasons
 			// At this point the loop will just try again, however generally at this point the other requests will also fail
-			console.error(error);
+			console.log(error.message);
 			console.log(new Date().toLocaleTimeString() + "." + new Date().getMilliseconds() + " - Attempt number " + attempts + " failed");
 		}
 	}
