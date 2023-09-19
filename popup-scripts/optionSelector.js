@@ -3,7 +3,11 @@
 // The option id is stored as the html id of the option, the slot time is stored as "start,end"
 // If a selector has not been selected, the value is an empty string
 
-let optionSelect = document.getElementById("option-select");
+const optionSelect = document.getElementById("option-select");
+const slotSelect = document.getElementById("slot-select");
+
+// Maximum number of days in the future for which options are shown
+const MAX_DAYS_IN_FUTURE = 3;
 
 // Main function which is called after the page info is received
 // Adds the registration options to the selector and shows relevant info messages
@@ -15,8 +19,7 @@ let initOptionSelector = async () => {
 	let ongoingTask = (await chrome.storage.session.get(tabId.toString()))[tabId];
 	let finished = ongoingTask?.status == "success" || ongoingTask?.status == "failure";
 	if (ongoingTask && !finished) {
-		// Show a message
-		document.getElementById("info-ongoing-task").hidden = false;
+		// Return, as this tab shouldn't have any interaction options
 		return;
 	}
 
@@ -33,6 +36,9 @@ let initOptionSelector = async () => {
 
 	// Filter out any options which have already opened and are not available anymore
 	pageInfo.options = pageInfo.options.filter((option) => !(option.start < new Date() && !option.available));
+
+	// Filter out any options which are more than MAX_DAYS_IN_FUTURE days in the future
+	pageInfo.options = pageInfo.options.filter((option) => !(option.start > new Date(Date.now() + MAX_DAYS_IN_FUTURE * 24 * 60 * 60 * 1000)));
 
 	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {
@@ -78,12 +84,19 @@ let initOptionSelector = async () => {
 // Called when a new option is selected
 // This handled the relevant messages and adds the slots of the option has any
 optionSelect.addEventListener("change", (event) => {
+	// If there are ongoing tasks, show warning message
+	chrome.storage.session.get(null).then((allTasks) => {
+		let ongoingTasks = Object.values(allTasks).filter((task) => task.status != "success" && task.status != "failure");
+		if (ongoingTasks.length > 0) {
+			document.getElementById("info-multiple-tasks").hidden = false;
+		}
+	});
+
 	// Determine the selected option (undefined if it's an lva option)
 	let optionId = event.target.value;
 	let optionInfo = pageInfo.options.find((option) => option.id == optionId);
 
 	// Remove all current slots
-	let slotSelect = document.getElementById("slot-select");
 	while (slotSelect.firstChild) {
 		slotSelect.removeChild(slotSelect.firstChild);
 	}
