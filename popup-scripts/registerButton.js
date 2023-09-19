@@ -10,12 +10,12 @@ document.getElementById("option-select").addEventListener("change", () => {
 	let optionId = document.getElementById("option-select").value;
 	let optionInfo = pageType == "lva" ? pageInfo.options[0] : pageInfo.options.find((option) => option.id == optionId);
 
-	// Display a warning if the registration date is more than 10 days in the future
-	let moreThan10Days = optionInfo.start > new Date(Date.now() + 10 * 24 * 60 * 60 * 1000);
-	document.getElementById("info-long-wait").hidden = !moreThan10Days;
+	// Display a warning if the registration date is more than 2 hours
+	let moreThan2Hours = optionInfo.start - Date.now() > 2 * 60 * 60 * 1000;
+	document.getElementById("info-long-wait").hidden = !moreThan2Hours;
 
-	// Disable the button if the option has slots or the registration date is more than 10 days in the future
-	registerButton.disabled = moreThan10Days || optionInfo.slots;
+	// Disable the button if the option has slots
+	registerButton.disabled = optionInfo.slots;
 });
 
 // Listener for the slot select, which enables the register button
