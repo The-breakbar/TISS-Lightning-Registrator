@@ -11,3 +11,65 @@ Please note that the extension does not handle authentication, it needs the user
 ## Step 2: Performing the registration
 
 ## API Docs
+
+> [!NOTE]
+> While this documentation tries to be as complete as possible, everything is based on manual observations and "trial and error". Certain things have not been thoroughly tested and are unknown. It is good enough for this extension, however that might not be the case for every use case. If you find any mistakes or have additional information, please open an issue or a pull request.
+
+### Prerequisites
+
+- All requests need the following 3 cookies: `_tiss_session`, `TISS_AUTH`, `JSESSIONID`. These are present after logging in to TISS and should be passed along with every request.
+- To mimic the site, POST requests should have the `Content-Type` header set to `application/x-www-form-urlencoded` (and the body should be encoded as such).
+
+### LVA endpoint - /education/course/courseRegistration.xhtml (POST)
+
+This endpoint mimics the register button for an LVA registration. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302) response will contain a redirect to the error page.
+
+| Key name                   | Value                  | Notes                                                                                                                                |
+| -------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `registrationForm:j_id_6t` | `"Register"`           | Key name is the HTML id of the registration button<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `registrationForm_SUBMIT`  | `1`                    |
+| `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                                  |
+| `javax.faces.ClientWindow` | Same value as `dspwid` |
+| `javax.faces.ViewState`    | A valid ViewState      |
+
+### Group endpoint - /education/course/groupList.xhtml (POST)
+
+| Key name                        | Value                  | Notes                                                                                                                                                                                                    |
+| ------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `groupContentForm:<id>:j_id_a1` | `"Register"`           | Key name is the HTML id of the registration button<br />The `<id>` part of the key is different for every group option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `groupContentForm_SUBMIT`       | `1`                    |
+| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                      |
+| `javax.faces.ClientWindow`      | Same value as `dspwid` |
+| `javax.faces.ViewState`         | A valid ViewState      |
+
+### Exam endpoint - /education/course/examDateList.xhtml (POST)
+
+| Key name                        | Value                  | Notes                                                                                                                                                                                                   |
+| ------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `examDateListForm:<id>:j_id_9u` | `"Register"`           | Key name is the HTML id of the registration button<br />The `<id>` part of the key is different for every exam option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `examDateListForm_SUBMIT`       | `1`                    |
+| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                     |
+| `javax.faces.ClientWindow`      | Same value as `dspwid` |
+| `javax.faces.ViewState`         | A valid ViewState      |
+
+### Example curl commands
+
+These are some example curl commands that show how to perform the requests. Make sure to replace the following values:
+
+- Cookies (`JSESSIONID`, `TISS_AUTH`, `_tiss_session`)
+- ViewState (`javax.faces.ViewState`)
+- Window id (`dspwid`, `javax.faces.ClientWindow`)
+- Group/Exam option id (`groupContentForm:<id>:j_id_a1` / `examDateListForm:<id>:j_id_9u`)
+
+#### LVA endpoint
+
+```bash
+curl --location 'https://tiss.tuwien.ac.at/education/course/courseRegistration.xhtml' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Cookie: JSESSIONID=d7~CC38E402394034D90A28E8D77D9E0022; TISS_AUTH=fe21d3192f3bc581ce4ed9c9ghd6cd5f80707441837c4dc15b9481368fb5d0c8; TISS_LANG=de; _tiss_session=50d4bfd6423157d995a18e7ef6150772' \
+--data-urlencode 'registrationForm%3Aj_id_6t=Register' \
+--data-urlencode 'registrationForm_SUBMIT=1' \
+--data-urlencode 'dspwid=8359' \
+--data-urlencode 'javax.faces.ClientWindow=8359' \
+--data-urlencode 'javax.faces.ViewState=REQwQTlEN0FDRUExZEEwNTAwMDAwMDI1'
+```
