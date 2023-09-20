@@ -25,39 +25,60 @@ As a helpful source, a Javascript implementation of all of these endpoints can b
 
 ## LVA endpoint - /education/course/courseRegistration.xhtml (POST)
 
-This endpoint mimics the register button for an LVA registration. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
+Sending this request mimics the register button for an LVA registration. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
 
-| Key name                   | Value                  | Notes                                                                                                                                |
-| -------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| `registrationForm:j_id_6t` | `"Register"`           | Key name is the HTML id of the registration button<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+The request body needs to contain the following key-value pairs:
+
+| Key name                   | Value                  | Notes                                                                                                                            |
+| -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `registrationForm:j_id_6t` | `"Register"`           | Key name is the HTML id of the register button<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
 | `registrationForm_SUBMIT`  | `1`                    |
-| `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                                  |
+| `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                              |
 | `javax.faces.ClientWindow` | Same value as `dspwid` |
 | `javax.faces.ViewState`    | A valid ViewState      |
 
 ## Group endpoint - /education/course/groupList.xhtml (POST)
 
-This endpoint mimics the register button for a group registration. The `<id>` for the first parameter has to be extracted from the id of the button from the group option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
+Sending this request mimics the register button for a group registration. The `<id>` for the first parameter has to be extracted from the id of the button from the group option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
 
-| Key name                        | Value                  | Notes                                                                                                                                                                                                    |
-| ------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `groupContentForm:<id>:j_id_a1` | `"Register"`           | Key name is the HTML id of the registration button<br />The `<id>` part of the key is different for every group option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+The request body needs to contain the following key-value pairs:
+
+| Key name                        | Value                  | Notes                                                                                                                                                                                                |
+| ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `groupContentForm:<id>:j_id_a1` | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every group option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
 | `groupContentForm_SUBMIT`       | `1`                    |
-| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                      |
+| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                  |
 | `javax.faces.ClientWindow`      | Same value as `dspwid` |
 | `javax.faces.ViewState`         | A valid ViewState      |
 
 ## Exam endpoint - /education/course/examDateList.xhtml (POST)
 
-This endpoint mimics the register button for an exam registration. The `<id>` for the first parameter has to be extracted from the id of the button from the exam option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
+Sending this request mimics the register button for an exam registration. The `<id>` for the first parameter has to be extracted from the id of the button from the exam option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page.
 
-| Key name                        | Value                  | Notes                                                                                                                                                                                                   |
-| ------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `examDateListForm:<id>:j_id_9u` | `"Register"`           | Key name is the HTML id of the registration button<br />The `<id>` part of the key is different for every exam option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+The request body needs to contain the following key-value pairs:
+
+| Key name                        | Value                  | Notes                                                                                                                                                                                               |
+| ------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `examDateListForm:<id>:j_id_9u` | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every exam option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
 | `examDateListForm_SUBMIT`       | `1`                    |
-| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                     |
+| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                 |
 | `javax.faces.ClientWindow`      | Same value as `dspwid` |
 | `javax.faces.ViewState`         | A valid ViewState      |
+
+## Confirm endpoint - /education/course/register.xhtml (POST)
+
+Sending this request mimics the confirm button on the confirmation page. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will contain a redirect to the error page. Note the additional parameter `regForm:subgrouplist` which is only needed if registering for an exam with slots.
+
+The request body needs to contain the following key-value pairs:
+
+| Key name                          | Value                  | Notes                                                                                                                                                                                                                                                                           |
+| --------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `regForm:j_id_30`                 | `"Register"`           | Key name is the HTML id of the register button<br />`"Anmelden"` is also valid as the value                                                                                                                                                                                     |
+| `regForm_SUBMIT`                  | `1`                    |
+| `dspwid`                          | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                                                                                             |
+| `javax.faces.ClientWindow`        | Same value as `dspwid` |
+| `javax.faces.ViewState`           | A valid ViewState      |
+| `regForm:subgrouplist` (Optional) | Slot value             | **Only needed if registering for exam with slots**<br />The confirmation page contains a dropdown menu (`<select>`) with the available slots to choose from<br />The value is the value attribute of the option (e.g. `<option value="138848">`) of the slot you want to choose |
 
 ## Example curl commands
 
@@ -75,7 +96,7 @@ Also note that the [--data-urlencode](https://everything.curl.dev/http/post/url-
 ```bash
 curl --location 'https://tiss.tuwien.ac.at/education/course/courseRegistration.xhtml' \
 --header 'Content-Type: application/x-www-form-urlencoded' \
---header 'Cookie: JSESSIONID=d7~CC38E402394034D90A28E8D77D9E0022; TISS_AUTH=fe21d3192f3bc581ce4ed9c9ghd6cd5f80707441837c4dc15b9481368fb5d0c8;  _tiss_session=50d4bfd6423157d995a18e7ef6150772' \
+--header 'Cookie: JSESSIONID=d7~CC38E402394034D90A28E8D77D9E0022; TISS_AUTH=fe21d3192f3bc581ce4ed9c9ghd6cd5f80707441837c4dc15b9481368fb5d0c8; _tiss_session=50d4bfd6423157d995a18e7ef6150772' \
 --data-urlencode 'registrationForm%3Aj_id_6t=Register' \
 --data-urlencode 'registrationForm_SUBMIT=1' \
 --data-urlencode 'dspwid=8359' \
@@ -107,4 +128,17 @@ curl --location 'https://tiss.tuwien.ac.at/education/course/examDateList.xhtml' 
 --data-urlencode 'dspwid=8359' \
 --data-urlencode 'javax.faces.ClientWindow=8359' \
 --data-urlencode 'javax.faces.ViewState=NzYyNEJDQTdBODQ0BIN2QjAwMDAwMDJD'
+```
+
+### Confirm endpoint
+
+```bash
+curl --location 'https://tiss.tuwien.ac.at/education/course/register.xhtml' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--header 'Cookie: JSESSIONID=d7~CC38E402394034D90A28E8D77D9E0022; TISS_AUTH=fe21d3192f3bc581ce4ed9c9ghd6cd5f80707441837c4dc15b9481368fb5d0c8; _tiss_session=50d4bfd6423157d995a18e7ef6150772' \
+--data-urlencode 'regForm%3Aj_id_30=Register' \
+--data-urlencode 'regForm_SUBMIT=1' \
+--data-urlencode 'dspwid=8358' \
+--data-urlencode 'javax.faces.ClientWindow=8358' \
+--data-urlencode 'javax.faces.ViewState=RUVBN0FTEUZEMUI3QjQzNTAwMDAwMDQw'
 ```
