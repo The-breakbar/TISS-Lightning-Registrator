@@ -40,6 +40,16 @@ let initOptionSelector = async () => {
 	// Filter out any options which are more than MAX_DAYS_IN_FUTURE days in the future
 	pageInfo.options = pageInfo.options.filter((option) => !(option.start > new Date(Date.now() + MAX_DAYS_IN_FUTURE * 24 * 60 * 60 * 1000)));
 
+	// Filter out any slots which are full
+	pageInfo.options.forEach((option) => {
+		if (option.slots) {
+			option.slots = option.slots.filter((slot) => {
+				let full = parseInt(slot.participants.split("/")[0]) >= parseInt(slot.participants.split("/")[1]);
+				return !full;
+			});
+		}
+	});
+
 	// If there are no options left, show a message
 	if (pageInfo.options.length == 0) {
 		document.getElementById("info-no-options").hidden = false;
@@ -107,7 +117,6 @@ optionSelect.addEventListener("change", (event) => {
 		return;
 	}
 
-	// If there are slots, reveal the slot selector
 	slotSelect.hidden = false;
 
 	// Add a prompt option
