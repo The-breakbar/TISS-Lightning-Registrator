@@ -27,7 +27,9 @@ To update the extension, simply remove the existing version and install the newe
 
 ## How it works
 
-The extension essentially does the same steps a regular user would do, however it can register as soon as it receives a response from the server, instead of having to wait for the rest of the page to load. This allows it to perform the registration process much quicker and register faster than a human user would be able to. If you are interested, you can read more about the development of the extension [here](DEVELOPMENT.md).
+> For a more detailed explanation of the extension's development, see [DEVELOPMENT.md](DEVELOPMENT.md).
+
+The extension essentially does the same steps a regular user would do, however it can register as soon as it receives a response from the server, instead of having to wait for the rest of the page to load. This allows it to perform the registration process much quicker and register faster than a human user would be able to.
 
 As the extension is based very tightly on the TISS website, any future changes to the site may break the extension.
 
