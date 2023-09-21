@@ -36,7 +36,7 @@ If you are an all-knowing entity (or have been looking through the source code o
 
 So if we generate this unique token and create the cookie before sending our GET request, we should immediately receive the page we wanted to go to, instead of the loading page. For this we have to make a small detour and explain how the token is generated.
 
-At this point there was a serious concern that you might not be able to replicate the token generation on the client side, as it might be done with some server side magic. Additionally the documentation had no mention of how the token is generated, so the only way to find out was to look through the source code.
+At this point there was serious concern that it might not be possible to replicate the token generation on the client side, as it might be using some server side magic. Additionally the documentation had no mention of how the token is generated, so the only way to find out was to look through the source code.
 
 At the bottom of the window handler page, there is a small script which is responsible for the redirect:
 
@@ -52,13 +52,13 @@ The `handleWindowId` function is found in [`windowIdHandling.js`](https://tiss.t
 var requestToken = dswh.utils.generateNewRequestToken();
 ```
 
-`dswh` obviously stands for "Deltaspike Window Handler", so this calls the utilities of that module. Those utilities are found in [`windowhandler.js`](https://tiss.tuwien.ac.at/education/javax.faces.resource/windowhandler.js.xhtml?ln=deltaspike), and while difficult to read, the file is fortunately only minimized, but not obfuscated. After a quick search you can find the sophisticated token generation algorithm in this function:
+`dswh` obviously stands for "Deltaspike Window Handler", so this uses the utilities of that module. Those utilities are found in [`windowhandler.js`](https://tiss.tuwien.ac.at/education/javax.faces.resource/windowhandler.js.xhtml?ln=deltaspike), and while difficult to read, the file is fortunately only minimized, but not obfuscated. After a quick search you can find the sophisticated token generation algorithm in this function:
 
 ```javascript
 generateNewRequestToken:function(){return""+Math.floor(999*Math.random())}
 ```
 
-So it turns out that the token is just a random number between 0 and 999. This is great news, as it means that we don't even have to replicate the token generation, we can just hardcode it. Checking the cookies of the site reveals the exact format of the cookie, which results in the following code (the `windowId` is extracted from the url parameters):
+So it turns out that the token is just a random number between 0 and 999. This is great news, as it means that we don't even have to replicate the token generation, we can just hardcode it. Checking the cookies of the site reveals the exact format of the cookie, which results in the following code for the extension (the `windowId` is extracted from the url parameters):
 
 ```javascript
 const DSRID_VALUE = 1;
