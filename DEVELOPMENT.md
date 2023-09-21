@@ -1,21 +1,90 @@
 # Development
 
-This is a short summary of the technical part of the extension and how it was developed. It is meant as a reference for the internal TISS API, as well as a documentation for the development of the extension.
+This is a short summary of the technical part of the extension and how it was developed. It is meant as a reference for the internal TISS API, as well as documentation for the development of the extension.
 
-Please note that the extension does not handle authentication, it needs the user to be logged in to TISS beforehand. Authentication with the server happens over cookies, which are passed along with every request. If you are looking for a way to automatically log in to TISS, there is a great [guide](https://github.com/flofriday/TU_Wien_Addressbook#how-does-the-app-log-in-to-get-student-information) by flofriday on how to do that.
+TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](https://github.com/mangei/tissquickregistrationscript) by Manuel Geier which was used by many students. The script is a great tool, however there are various parts of it which have potential for improvement (additionally it is no longer maintained). The main goal of this extension was not to make a better version of the script, but to create a completely new tool which would be faster, more reliable and easier to use.
 
 ## Overview
 
-The extension started with the mentality that everything a user can do can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not actually register for them. The only way to register for an LVA, group or exam is to use the website itself. This means that the extension had to mimic the website as closely as possible, which is not an easy task.
+Development started with the mentality that everything a user can do can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not actually register for them. The only way to register for an LVA, group or exam is to use the website itself. This means that the extension had to replicate the requests by reverse-engineering the website, which is not an easy task.
+
+It took quite a while until the first request was replicated, and initial testing unfortunately revealed that you could not skip any steps of the registration process, and had to follow the same steps as a regular user (refresh until open, click register button, confirm registration). This resulted in this simple registration flow:
+
+- Refresh the page until the registration is open
+- Send the request for pressing the register button
+- Send the request for confirming the registration
+
+While this seems pretty basic, every step had its own challenges and problems which had to be solved. Managing to replicate the registration process for the first time was a big milestone, and took quite a bit of time and effort. The following sections will go into detail about each step of the registration process and how it was solved.
+
+Please note that the extension does not handle authentication, it needs the user to be logged in to TISS beforehand. Authentication with the server happens over cookies, which are passed along with every request. If you are looking for a way to automatically log in to TISS, there is a great [guide](https://github.com/flofriday/TU_Wien_Addressbook#how-does-the-app-log-in-to-get-student-information) by flofriday on how to do that.
+
+## Step 0: TISS internals
+
+Before going into the registration process, it is important to know what TISS uses internally. The website seems to be made using [Java Server Faces](https://www.oracle.com/java/technologies/javaserverfaces.html) or some variation of that, as well as [Apache Deltaspike](https://deltaspike.apache.org/documentation/overview.html). While it is not necessary to know how these frameworks work (I certainly don't), their documentation was very important in understanding some very specific details of the TISS website.
 
 ## Step 1: Refreshing the page
 
-## Step 2: Performing the registration
+As part of the performance requirements (as well as for user experience), it was essential that all requests (including refreshes) were done inside of Javascript, so that none of the images/css of the response would start to load (since only the HTML is needed). For a refresh, this could be achieved with a simple GET request with a `fetch()` of the current url, however this causes a problem:
+
+If you have been attentive, you might have noticed that each time you refresh the page or click on a link, the url changes while the page is loading. You are actually always redirected to a loading page first, which then redirects you to the page you wanted to go to. This is unfortunately very annoying for our fetch request, as it will receive the loading page as the response.
+
+If you are an all-knowing entity (or have been looking through the source code of the loading page), you might deduct that the loading page is a so called "window handler" from the ["Multi-Window Handling" part of the JSF Module from Deltaspike](https://deltaspike.apache.org/documentation/jsf.html#Multi-WindowHandling). Fortunately their documentation explains how the window handler works:
+
+> Each GET request results in an intermediate small HTML page (aka "windowhandler").
+
+> ... a unique token (called dsrid) will be generated for the current request and added to the URL. In addition a cookie with with the dsrid/dswid will be added. On the server side, the verified windowId will be extracted from the cookie. For POST request detection, the windowId will be added as hidden input to all forms.
+
+So if we generate this unique token and create the cookie before sending our GET request, we should immediately receive the page we wanted to go to, instead of the loading page. For this we have to make a small detour and explain how the token is generated.
+
+At this point there was a serious concern that you might not be able to replicate the token generation on the client side, as it might be done with some server side magic. Additionally the documentation had no mention of how the token is generated, so the only way to find out was to look through the source code.
+
+At the bottom of the window handler page, there is a small script which is responsible for the redirect:
+
+```javascript
+window.onload = function () {
+	handleWindowId(newWindowId, redirectUrl);
+};
+```
+
+The `handleWindowId` function is found in [`windowIdHandling.js`](https://tiss.tuwien.ac.at/education/faces/javax.faces.resource/1695205112000/js/windowIdHandling.js?v=4.7.3), which contains all the code that creates the cookie, but also this line:
+
+```javascript
+var requestToken = dswh.utils.generateNewRequestToken();
+```
+
+`dswh` obviously stands for "Deltaspike Window Handler", so this calls the utilities of that module. Those utilities are found in [`windowhandler.js`](https://tiss.tuwien.ac.at/education/javax.faces.resource/windowhandler.js.xhtml?ln=deltaspike), and while difficult to read, the file is fortunately only minimized, but not obfuscated. After a quick search you can find the sophisticated token generation algorithm in this function:
+
+```javascript
+generateNewRequestToken:function(){return""+Math.floor(999*Math.random())}
+```
+
+So it turns out that the token is just a random number between 0 and 999. This is great news, as it means that we don't even have to replicate the token generation, we can just hardcode it. Checking the cookies of the site reveals the exact format of the cookie, which results in the following code (the `windowId` is extracted from the url parameters):
+
+```javascript
+const DSRID_VALUE = 1;
+document.cookie = `dsrwid-${DSRID_VALUE}=${windowId}`;
+```
+
+Now that the cookie is set, the page can be fetched with the modified url (replacing the `dsrid` value with our own).
+
+```javascript
+fetch(document.location.href.replace(/dsrid=\d*/, `dsrid=${DSRID_VALUE}`));
+```
+
+This is what the extension uses to refresh a page without loading any unnecessary resources and without being redirected to the loading page. Onto the next step!
+
+## Step 2: Sending the first request
+
+ViewState
+
+## Step 3: Sending the second request
+
+Slots
 
 # API Docs
 
 > [!NOTE]
-> While this documentation tries to be as complete as possible, everything is based on manual observations and "trial and error". Certain things have not been thoroughly tested and are unknown. It is good enough for this extension, however that might not be the case for every use case. If you find any mistakes or have additional information, please open an issue or a pull request.
+> While this documentation tries to be as complete as possible, certain things have not been thoroughly tested and are unknown. It is sufficient for this extension, however that might not be the case for every use case. If you find any mistakes or have additional information, please open an issue or a pull request.
 
 ## General notes
 
@@ -23,7 +92,7 @@ The extension started with the mentality that everything a user can do can also 
 - To mimic the site, POST requests should have the `Content-Type` header set to `application/x-www-form-urlencoded` (and the body should be encoded as such).
 - An error is generally indicated by a 302, or a redirect. Make sure you detect and don't follow any redirects, as they will lead to an error page or redirect back to the original page, making it seem like nothing happened.
 
-As a helpful source, a Javascript implementation of all of these endpoints can be found in the [sendRegistration.js](content-scripts/sendRegistration.js) file.
+As a helpful source, a Javascript implementation of all of these endpoints can be found in the [`sendRegistration.js`](content-scripts/sendRegistration.js) file.
 
 ## LVA endpoint - /education/course/courseRegistration.xhtml (POST)
 
