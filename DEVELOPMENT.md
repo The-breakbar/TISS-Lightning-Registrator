@@ -6,6 +6,8 @@ Please note that the extension does not handle authentication, it needs the user
 
 ## Overview
 
+The extension started with the mentality that everything a user can do can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not actually register for them. The only way to register for an LVA, group or exam is to use the website itself. This means that the extension had to mimic the website as closely as possible, which is not an easy task.
+
 ## Step 1: Refreshing the page
 
 ## Step 2: Performing the registration
@@ -19,13 +21,13 @@ Please note that the extension does not handle authentication, it needs the user
 
 - All requests need the following 3 cookies: `_tiss_session`, `TISS_AUTH`, `JSESSIONID`. These are present after logging in to TISS and should be passed along with every request.
 - To mimic the site, POST requests should have the `Content-Type` header set to `application/x-www-form-urlencoded` (and the body should be encoded as such).
-- An error is generally indicated by a 302, or a redirect. Make sure you detect and don't follow any redirects, as they will lead to an error page.
+- An error is generally indicated by a 302, or a redirect. Make sure you detect and don't follow any redirects, as they will lead to an error page or redirect back to the original page, making it seem like nothing happened.
 
 As a helpful source, a Javascript implementation of all of these endpoints can be found in the [sendRegistration.js](content-scripts/sendRegistration.js) file.
 
 ## LVA endpoint - /education/course/courseRegistration.xhtml (POST)
 
-Sending this request mimics the register button for an LVA registration. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will redirect to an error page.
+Sending this request mimics the register button for an LVA registration. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful response is generally a 302 or a redirect.
 
 The request body needs to contain the following key-value pairs:
 
@@ -39,7 +41,7 @@ The request body needs to contain the following key-value pairs:
 
 ## Group endpoint - /education/course/groupList.xhtml (POST)
 
-Sending this request mimics the register button for a group registration. The `<id>` for the first parameter has to be extracted from the id of the button from the group option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will redirect to an error page.
+Sending this request mimics the register button for a group registration. The `<id>` for the first parameter has to be extracted from the id of the button from the group option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful response is generally a 302 or a redirect.
 
 The request body needs to contain the following key-value pairs:
 
@@ -53,7 +55,7 @@ The request body needs to contain the following key-value pairs:
 
 ## Exam endpoint - /education/course/examDateList.xhtml (POST)
 
-Sending this request mimics the register button for an exam registration. The `<id>` for the first parameter has to be extracted from the id of the button from the exam option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful (302 or redirect) response will redirect to an error page.
+Sending this request mimics the register button for an exam registration. The `<id>` for the first parameter has to be extracted from the id of the button from the exam option which you want to register for. A successful (200) response will contain the confirmation page in the form of a `text/html` document. An unsuccessful response is generally a 302 or a redirect.
 
 The request body needs to contain the following key-value pairs:
 
@@ -67,7 +69,7 @@ The request body needs to contain the following key-value pairs:
 
 ## Confirm endpoint - /education/course/register.xhtml (POST)
 
-Sending this request mimics the final confirm button on the confirmation page. A successful (200) response will contain the page with the registration result info in the form of a `text/html` document. An unsuccessful (302 or redirect) response will redirect to an error page. Note the additional parameter `regForm:subgrouplist` which is only needed if registering for an exam with slots.
+Sending this request mimics the final confirm button on the confirmation page. A successful (200) response will contain the page with the registration result info in the form of a `text/html` document. An unsuccessful response is generally a 302 or a redirect. Note the additional parameter `regForm:subgrouplist` which is only needed if registering for an exam with slots.
 
 The request body needs to contain the following key-value pairs:
 
