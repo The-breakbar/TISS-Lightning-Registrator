@@ -20,14 +20,14 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
    - Edge: `edge://extensions`
 
 3. Enable "Developer mode" in the top right (left side for Edge).
-4. Click the "Load unpacked extension" button and select the unpacked folder which you downloaded.
+4. Click the "Load unpacked extension" button and select the unpacked folder which you downloaded (make sure you select the folder which contains all the files).
 5. Done! Pin the extension to your top bar and use it by clicking on its icon.
 
 To update the extension, simply remove the existing version and install the newest version with the same steps.
 
 ## How it works
 
-> For a more detailed explanation of the extension's development, see [DEVELOPMENT.md](DEVELOPMENT.md).
+> If you are interested, for a more detailed explanation of the extension's development and the TISS API, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 The extension essentially does the same steps a regular user would do, however it can register as soon as it receives a response from the server, instead of having to wait for the rest of the page to load. This allows it to perform the registration process much quicker and register faster than a human user would be able to.
 
@@ -35,4 +35,4 @@ As the extension is based very tightly on the TISS website, any future changes t
 
 ## Bug reports
 
-All bug reports are appreciated! If you find any bugs, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues). Error messages can be found in the console of the tab where the extension was used. There might also be an "Errors" button on the browser settings page where the extension was installed. It contains errors from the pop-up window, as those are not logged to the regular console.
+All bug reports are appreciated! If you find any bugs, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues). Error messages can be found in the console of the tab where the extension was used (they're only present as long as you don't refresh or change the page). There might also be an "Errors" button on the browser settings page where the extension was installed. It contains errors from the pop-up window, as those are not logged to the regular console.
