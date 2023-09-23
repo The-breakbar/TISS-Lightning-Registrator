@@ -4,6 +4,19 @@ This is a short summary of the technical part of the extension and how it was de
 
 TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](https://github.com/mangei/tissquickregistrationscript) by Manuel Geier which was used by many students. The script is a great tool, however there are various parts of it which have potential for improvement (additionally it is no longer maintained). The main goal of this extension was not to make a better version of the script, but to create a completely new tool which would be faster, more reliable and easier to use.
 
+## Table of contents
+
+- [Overview](#overview)
+- [Step 0: TISS internals](#step-0-tiss-internals)
+- [Step 1: Refreshing the page](#step-1-refreshing-the-page)
+- [Step 2: Sending the first request](#step-2-sending-the-first-request)
+  - [ViewState](#viewstate)
+- [Step 3: The second request](#step-3-the-second-request)
+- [Results](#results)
+- [Conclusion](#conclusion)
+
+> The [API documentation](#api-docs) is found at the bottom of this page.
+
 ## Overview
 
 Development started with the mentality that everything a user can do can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not actually register for them. The only way to register for an LVA, group or exam is to use the website itself. This means that the extension had to replicate the requests by reverse-engineering the website, which is not an easy task.
@@ -114,7 +127,7 @@ This means that the ViewState has to be extracted from the page itself, and can'
 pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
 ```
 
-These constraints are unfortunately also the reason why the extension can't skip any steps of the registration process. The first ViewState isn't valid until the register button exists and the second ViewState is dependant on the first request. This results in the following registration process:
+These constraints are unfortunately also the reason why the extension can't skip any steps of the registration process. The first ViewState isn't valid until the register button exists and the second ViewState is dependant on the first request. This forces us into the previously mentioned registration process:
 
 - Refresh the page until the registration opens (the register button exists)
 - Extract the ViewState and use it to send the first request
@@ -168,20 +181,20 @@ With this, the registration process is complete and the extension can register f
 
 ## Results
 
-During regular conditions, the extension can register in less than a second, with the fastest times being around 250ms. The timeline looks like this:
+During regular conditions, the extension can register in less than a second, with the fastest times being around 250ms. Note that this includes the time needed for the first refresh. Depending on how you interpret "registration duration", this can be included or not. The time that the extension shows when a registration succeeds does not include it (it is supposed to represent the time the extension took to do the same thing the user would have had to do). The timeline looks like this:
 
 0. Refresh loop, usually with a frequency of 100-300ms per refresh
-1. (At this point the registration has openened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, there might be an extra delay, as the registration might open while the previous request is still being processed)
+1. (At this point the registration has openened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, this might already be delayed, as the registration might open while the previous request is still being processed)
 2. Send the first request (100-300ms)
 3. Send the second request (up to 10 seconds, depending on server traffic)
 
-The response time of the second request is highly dependent on how much traffic the TISS servers have to handle at the time, in the best case it takes 100-300ms like the other requests, but it can also take longer. Note that this does not mean that the extension is slow, it is just waiting for the server to respond (and so is every other user that is trying to register at the same time).
+Of course one of the biggest factors is the user's internet connection. Additionally the response time of the second request is highly dependent on how much traffic the TISS servers have to handle at the time, in the best case it takes 100-300ms like the other requests, but it can also take longer. Note that this does not mean that the extension is slow, it is just waiting for the server to respond (and so is every other user that is trying to register at the same time).
 
-While there is room for improvement, about 90% of the time is spent waiting for the server to respond. An attempt could be made to time the refresh so that the registration opens just before the refresh, however this would require a lot of testing and would be difficult to get right.
+While there is room for improvement, about 90% of the time is spent waiting for the server to respond. An attempt could be made to time the refresh so that the registration opens just before the refresh, however this would require a lot of testing and would be difficult to get right. Throughout countless live tests, including many high traffic registrations, the extension managed to register every time, so the performance is sufficient for now.
 
 ## Conclusion
 
-Hopefully this was an interesting read, even if you're not planning to implement this API yourself. Reverse-engineering the TISS website was a very interesting experience, and it turned a small project that I wanted to just make for myself into a full-fledged extension which I can easily share with others. If you have any questions or suggestions, feel free to open an issue or a pull request. Additionally you can easily reach me as "breakbar" on Discord.
+Hopefully this was an interesting read, even if you're not planning to implement this API yourself. Reverse-engineering the TISS website was a very interesting experience, and it turned a small project that I wanted to just make for myself, into a full-fledged extension which I can easily share with others. If you have any questions or suggestions, feel free to open an issue or a pull request. Additionally you can easily reach me as "breakbar" on Discord.
 
 # API Docs
 
