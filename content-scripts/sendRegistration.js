@@ -17,65 +17,10 @@
 
 // After the registration attempts are done, the result is processed in the resultHandler.js script
 
-// Documentation for the endpoints:
-
-// Every request has to have these 3 session cookies: _tiss_session, TISS_AUTH, JSESSIONID
-// The cookies generally do not change during the session, except for JSESSIONID, which has been observed to change when bad requests were sent
-
-// All body parameters are the same as the ones which are sent by the browser when the corresponding button is clicked
-// Some parameters are not required, but are included for completeness
-
-// /education/course/courseRegistration.xhtml (POST)
-// This endpoint is used to get the confirmation page of lva registrations and requires the following body:
-//  registrationForm:j_id_6t : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the register button)
-//  registrationForm_SUBMIT : "1"
-//  dspwid : A window id (found in the url as "dswid" or in the page)
-//  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState (see below)
-
-// /education/course/groupList.xhtml (POST)
-// This endpoint is used to get the confirmation page of group registrations and requires the following body:
-//  groupContentForm:<id>:j_id_a1 : "Register" ("Anmelden" is also valid) (the id in the key is from the html ids of the option, see getPageInfo.js)
-//  groupContentForm_SUBMIT : "1"
-//  dspwid : A window id (found in the url as "dswid" or in the page)
-//  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState (see below)
-
-// /education/course/examDateList.xhtml (POST)
-// This endpoint is used to get the confirmation page of exam registrations and requires the following body:
-//  examDateListForm:<id>:j_id_9u : "Register" ("Anmelden" is also valid) (the id in the key is from the html ids of the option, see getPageInfo.js)
-//  examDateListForm_SUBMIT : "1"
-//  dspwid : A window id (found in the url as "dswid" or in the page)
-//  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState (see below)
-
-// All of the above endpoints return the a body containing the confirmation page
-// Note that a 200 doesn't mean the request was successful, as the response can also be a redirect
-// The confirmation page may contain the slot selection options for exams with slots
-// The ViewState that is found in the response has to be used for the confirmation request
-
-// /education/course/register.xhtml (POST)
-// This endpoint is used to confirm the registration, has to be called after one of the lva/group/exam endpoints was called
-// It requires the following body:
-//  regForm:j_id_30 : "Register" ("Anmelden" is also valid) (the key of this parameter is the id of the confirm button)
-//  regForm_Submit : "1"
-//  dspwid : A window id (found in the url as "dswid" or in the page)
-//  javax.faces.ClientWindow : Same value as dspwid
-//  javax.faces.ViewState : A valid ViewState obtained from the response to the previous request (see below)
-//  regForm:subgrouplist : Number value of the exam slot selection html option (has to be extracted from the response to the previous request) (only for exams with slots)
-
-// ViewState (represents the state of the page)
-// The ViewState is a unique string that is required for every request and changes every time the page is loaded
-// A valid ViewState can only be used once for a request
-// It can be found in the page source as a hidden input field with the name "javax.faces.ViewState"
-// If a request wants to be sent to a registration that just opened, a new valid ViewState has to be obtained by refreshing the page
-// The response to the first registration request will contain a new ViewState, which can be used for the confirmation request
-
 // Define general registration parameters
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 3; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
-const MAX_REFRESH_INTERVAL = 300; // How often the page should be refreshed in ms (requests are sent at a maximum interval, to avoid sending too many requests)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
@@ -94,13 +39,13 @@ let getPage = async () => {
 	return pageDocument;
 };
 
-// Tab id is initialized with a register request, it is used by infoMessage.js to display the correct message
-let tabId;
-
 // Utility function to log the time with milliseconds
 let logExactTime = (...message) => {
 	console.log(`${new Date().toLocaleTimeString()}.${new Date().getMilliseconds().toString().padStart(3, "0")} -`, ...message);
 };
+
+// Tab id is initialized with a register request, it is used by infoMessage.js to display the correct message
+let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -129,8 +74,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		clearInterval(sessionRefresh);
 
 		// Start the refresh loop
-		let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
-		refreshLoop(stopTime, optionId, slot);
+		refreshLoop(optionId, slot);
 	}, remainingTime);
 
 	// Close the message connection
@@ -138,41 +82,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
-// Requests are sent in series at a maximum interval of MAX_REFRESH_INTERVAL ms, to avoid sending too many requests
-// If the button is not found after the specified time, the loop will stop
-let refreshLoop = async (stopTime, optionId, slot) => {
-	logExactTime("Refreshing page...");
-	let refreshStart = Date.now();
+// Requests are sent in series at, if the button is not found after the specified time, the loop will stop
+let refreshLoop = async (optionId, slot) => {
+	let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
+	let viewState;
 
-	// Refresh the page and check if the button is on the page
-	let pageDocument = await getPage();
-	let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+	while (!viewState && Date.now() < stopTime) {
+		logExactTime("Refreshing page...");
+		// Refresh the page and check if the button is on the page
+		let pageDocument = await getPage();
+		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
 
-	let button;
-	if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
-	else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
+		let button;
+		if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
+		else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
 
-	// If the button was found, extract the ViewState, stop the refresh loop and start the register loop
-	if (button) {
-		let viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
-		registerLoop(viewState, optionId, slot);
-		return;
+		// If the button was found, extract the ViewState
+		if (button) {
+			viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+		}
 	}
 
-	// If the stop time is reached, stop the loop
-	if (Date.now() > stopTime) {
+	// If the button was not found, the loop timed out
+	if (!viewState) {
 		logExactTime("Refresh loop timed out, no button found...");
 
 		// Timeout is handled in resultHandler.js
 		handleRefreshTimeout(tabId);
+
 		return;
 	}
 
-	// If needed, wait for the next iteration
-	let timeLeft = Math.max(0, MAX_REFRESH_INTERVAL - (Date.now() - refreshStart)); // Date.now() - refreshStart is the time it took to refresh the page
-	setTimeout(() => {
-		refreshLoop(stopTime, optionId, slot);
-	}, timeLeft);
+	// Start the registration loop
+	registerLoop(viewState, optionId, slot);
 };
 
 // Updates the status of the registration task
