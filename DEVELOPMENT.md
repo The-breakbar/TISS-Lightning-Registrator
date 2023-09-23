@@ -8,7 +8,7 @@ TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](
 
 Development started with the mentality that everything a user can do can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not actually register for them. The only way to register for an LVA, group or exam is to use the website itself. This means that the extension had to replicate the requests by reverse-engineering the website, which is not an easy task.
 
-It took quite a while until the first request was replicated, and initial testing unfortunately revealed that you could not skip any steps of the registration process, and had to follow the same steps as a regular user (refresh until open, click register button, confirm registration). This resulted in this simple registration flow:
+It took quite a while until the first request was replicated, and initial testing unfortunately revealed that you could not skip any steps of the registration process, and had to follow the same steps as a regular user. This resulted in this simple registration flow:
 
 - Refresh the page until the registration is open
 - Send the request for pressing the register button
@@ -20,7 +20,7 @@ Please note that the extension does not handle authentication, it needs the user
 
 ## Step 0: TISS internals
 
-Before going into the registration process, it is important to know what TISS uses internally. The website seems to be made using [Java Server Faces](https://www.oracle.com/java/technologies/javaserverfaces.html) or some variation of that, as well as [Apache Deltaspike](https://deltaspike.apache.org/documentation/overview.html). While it is not necessary to know how these frameworks work (I certainly don't), their documentation was very important in understanding some very specific details of the TISS website.
+Before going into the registration process, it is important to know what TISS uses internally. The website seems to be made using [Java Server Faces](https://www.oracle.com/java/technologies/javaserverfaces.html) (JSF) or some variation of that, as well as [Apache Deltaspike](https://deltaspike.apache.org/documentation/overview.html). While it is not necessary to know how these frameworks work (I certainly don't), their documentation was very important in understanding some very specific details of the TISS website.
 
 ## Step 1: Refreshing the page
 
@@ -75,11 +75,100 @@ This is what the extension uses to refresh a page without loading any unnecessar
 
 ## Step 2: Sending the first request
 
-ViewState
+The first request is the one that mimics the register button. Taking a look at the network tab of the browser reveals a POST request with the following body:
 
-## Step 3: Sending the second request
+```
+groupContentForm:j_id_52:0:j_id_5d:j_id_5g:65:j_id_a1: Anmelden
+groupContentForm_SUBMIT: 1
+javax.faces.ViewState: M0Q5MzlFERTCNTY5NEJCQjAwMDAwMDFD
+javax.faces.ClientWindow: 8203
+dspwid: 8203
+```
 
-Slots
+> See the [API Docs](#api-docs) for a detailed description of the request body.
+
+Although this specific body is for a group registration, they don't vary much between LVA/group/exam. Most of the body is pretty straightforward, the first entry is just the HTML id of the register button as the key, and the text of the button as the value. The second entry is always the same, and the last 2 entries are just the window id, which can be extracted from the url.
+
+### ViewState
+
+The only thing that is not clear is the ViewState. It changes for every request and repeating an already sent request a second time doesn't work. Fortunately there is a great [article](https://book.hacktricks.xyz/pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization) by HackTricks which talks about the ViewState and its potential vulnerabilities (although they don't apply to TISS).
+
+> JSF makes use of ViewStates (in addition to sessions) to store the current state of the view (e.g. what parts of the view should currently be displayed).
+
+> JSF ViewStates are typically automatically embedded into HTML forms as hidden field with the name `javax.faces.ViewState`. They are sent back to the server if the form is submitted.
+
+The ViewState string itself is a serialized Java object, although what it represents doesn't matter as we simply pass it along. The hidden field in TISS looks like this:
+
+```html
+<input type="hidden" name="javax.faces.ViewState" id="j_id__v_0:javax.faces.ViewState:2" value="NkE5RjdGMjA1QUVCQ0IFRDAwMDAwMDFG" autocomplete="off" />
+```
+
+Together with some testing, the following constraints were found:
+
+- A ViewState "represents" the page it is found in, and can only be used for actions that can be performed on that page
+- A ViewState can only be used once, repeating a request with the same ViewState will result in an error
+
+This means that the ViewState has to be extracted from the page itself, and can't be hardcoded. This is not a problem, as the ViewState is always found in the page, and can be extracted with a simple selector:
+
+```javascript
+pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+```
+
+These constraints are unfortunately also the reason why the extension can't skip any steps of the registration process. The first ViewState isn't valid until the register button exists and the second ViewState is dependant on the first request. This results in the following registration process:
+
+- Refresh the page until the registration opens (the register button exists)
+- Extract the ViewState and use it to send the first request
+- Extract the ViewState from the response and use it to send the second request
+
+For the extension, this was done with simple fetch requests and the useful `DOMParser` class, which can be used to parse the response as a HTML document and extract the ViewState from it.
+
+```javascript
+let firstResponse = await fetch(targetUrl, payload);
+validateResponse(firstResponse);
+let pageDocument = new DOMParser().parseFromString(await firstResponse.text(), "text/html");
+bodyData["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+```
+
+## Step 3: The second request
+
+The second request to confirm the registration isn't much different from the first one, the button id is constant and the only thing needed is the ViewState from the previous response. While sending the request doesn't provide any other obstacles, there is still one more problem: Exam Slots. Some exams (mostly oral exams) have multiple slots, where you can register for one of them. This is done during the confirmation page (after the first request) with a dropdown menu which contains all the available slots. The value of the selected slot is then sent with the second request.
+
+The `<option>` elements of the slot select contain two things: The text of the slot and a value attribute, which is some unique number.
+
+```html
+<select id="regForm:subgrouplist" name="regForm:subgrouplist" size="3">
+	<option value="138806">01.01.2023 14:00 - 14:15</option>
+	<option value="138807">01.01.2023 14:15 - 14:30</option>
+	<option value="138808">01.01.2023 14:30 - 14:45</option>
+</select>
+```
+
+The problem arises from the fact that we have to provide the user with a way to select a slot, but we can't parse the data from the response, as that has to be done before the registration opens. This means the slot data has to be parsed from the registration page, which unfortunately doesn't contain the value attribute.
+
+```html
+<tr>
+	<td>01.01.2023</td>
+	<td>14:00</td>
+	<td>14:15</td>
+	<td>0 / 1</td>
+</tr>
+```
+
+This forces us to do string comparisons between the text of the slot and the text of the option, which while not being ideal, is the only way to do it. To keep it as simple as possible, the extension just checks if the slot start and end time are contained in the option text (it is unknown if slots can be named).
+
+```javascript
+if (slot) {
+	let slotOptions = pageDocument.querySelectorAll(`select[id="regForm:subgrouplist"] option`);
+	let option = Array.from(slotOptions).find((option) => option.textContent.includes(slot[0]) && option.textContent.includes(slot[1]));
+	bodyData["regForm:subgrouplist"] = option.value;
+}
+```
+
+With this, the registration process is complete and the extension can register for LVAs, groups and exams.
+
+## Results
+
+During regular conditions, the extension can register in less than a second.
 
 # API Docs
 
@@ -106,7 +195,7 @@ The request body needs to contain the following key-value pairs:
 | `registrationForm_SUBMIT`  | `1`                    |
 | `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                              |
 | `javax.faces.ClientWindow` | Same value as `dspwid` |
-| `javax.faces.ViewState`    | A valid ViewState      |
+| `javax.faces.ViewState`    | A valid ViewState      | See [ViewState](#viewstate)                                                                                                      |
 
 ## Group endpoint - /education/course/groupList.xhtml (POST)
 
@@ -120,7 +209,7 @@ The request body needs to contain the following key-value pairs:
 | `groupContentForm_SUBMIT`       | `1`                    |
 | `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                  |
 | `javax.faces.ClientWindow`      | Same value as `dspwid` |
-| `javax.faces.ViewState`         | A valid ViewState      |
+| `javax.faces.ViewState`         | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                          |
 
 ## Exam endpoint - /education/course/examDateList.xhtml (POST)
 
@@ -134,7 +223,7 @@ The request body needs to contain the following key-value pairs:
 | `examDateListForm_SUBMIT`       | `1`                    |
 | `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                 |
 | `javax.faces.ClientWindow`      | Same value as `dspwid` |
-| `javax.faces.ViewState`         | A valid ViewState      |
+| `javax.faces.ViewState`         | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                         |
 
 ## Confirm endpoint - /education/course/register.xhtml (POST)
 
@@ -148,7 +237,7 @@ The request body needs to contain the following key-value pairs:
 | `regForm_SUBMIT`                  | `1`                    |
 | `dspwid`                          | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                                                                                             |
 | `javax.faces.ClientWindow`        | Same value as `dspwid` |
-| `javax.faces.ViewState`           | A valid ViewState      |
+| `javax.faces.ViewState`           | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                                                                                                     |
 | `regForm:subgrouplist` (Optional) | Slot value             | **Only needed if registering for exam with slots**<br />The confirmation page contains a dropdown menu (`<select>`) with the available slots to choose from<br />The value is the value attribute of the option (e.g. `<option value="138848">`) of the slot you want to choose |
 
 ## Example curl commands
