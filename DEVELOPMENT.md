@@ -143,7 +143,7 @@ The `<option>` elements of the slot select contain two things: The text of the s
 </select>
 ```
 
-The problem arises from the fact that we have to provide the user with a way to select a slot, but we can't parse the data from the response, as that has to be done before the registration opens. This means the slot data has to be parsed from the registration page, which unfortunately doesn't contain the value attribute.
+The problem arises from the fact that we have to provide the user with a way to select a slot, but we can't parse the data from the response, as that can only be done after the registration has opened. This means the slot data has to be parsed from the registration page, which unfortunately doesn't contain the value attribute.
 
 ```html
 <tr>
@@ -190,6 +190,7 @@ Hopefully this was an interesting read, even if you're not planning to implement
 
 ## General notes
 
+- First either the LVA, group or exam endpoint has to be called, depending on what you want to register for. After that, the response has to be used to call the confirm endpoint, which is the same for all 3.
 - All requests need the following 3 cookies: `_tiss_session`, `TISS_AUTH`, `JSESSIONID`. These are present after logging in to TISS and should be passed along with every request.
 - To mimic the site, POST requests should have the `Content-Type` header set to `application/x-www-form-urlencoded` (and the body should be encoded as such).
 - An error is generally indicated by a 302, or a redirect. Make sure you detect and don't follow any redirects, as they will lead to an error page or redirect back to the original page, making it seem like nothing happened.
