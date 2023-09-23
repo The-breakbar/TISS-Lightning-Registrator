@@ -168,7 +168,20 @@ With this, the registration process is complete and the extension can register f
 
 ## Results
 
-During regular conditions, the extension can register in less than a second.
+During regular conditions, the extension can register in less than a second, with the fastest times being around 250ms. The timeline looks like this:
+
+0. Refresh loop, usually with a frequency of 100-300ms per refresh
+1. (At this point the registration has openened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, there might be an extra delay, as the registration might open while the previous request is still being processed)
+2. Send the first request (100-300ms)
+3. Send the second request (up to 10 seconds, depending on server traffic)
+
+The response time of the second request is highly dependent on how much traffic the TISS servers have to handle at the time, in the best case it takes 100-300ms like the other requests, but it can also take longer. Note that this does not mean that the extension is slow, it is just waiting for the server to respond (and so is every other user that is trying to register at the same time).
+
+While there is room for improvement, about 90% of the time is spent waiting for the server to respond. An attempt could be made to time the refresh so that the registration opens just before the refresh, however this would require a lot of testing and would be difficult to get right.
+
+## Conclusion
+
+Hopefully this was an interesting read, even if you're not planning to implement this API yourself. Reverse-engineering the TISS website was a very interesting experience, and it turned a small project that I wanted to just make for myself into a full-fledged extension which I can easily share with others. If you have any questions or suggestions, feel free to open an issue or a pull request. Additionally you can easily reach me as "breakbar" on Discord.
 
 # API Docs
 
