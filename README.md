@@ -8,7 +8,9 @@ The extension streamlines registrations, working quietly in the background. You 
 
 ## Installing
 
-The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc). A Firefox version will be added in the future. The extension is not available on the Chrome Web Store, it has to be installed manually with the following steps:
+The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc) as well as Firefox. The extension is not available on an extension store, it has to be installed manually with the following steps:
+
+### Chrome / Opera / Edge
 
 1. Download the zip of the latest release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
 2. Navigate to the browser page of your installed extensions. It can be found under "Manage extensions" in your browser options or by going to the following links depending on your browser:
@@ -21,7 +23,16 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 4. Click the "Load unpacked extension" button and select the unpacked folder which you downloaded (make sure you select the folder which contains all the files).
 5. Done! Pin the extension to your top bar and use it by clicking on its icon.
 
-To update the extension, simply remove the existing version and install the newest version with the same steps.
+### Firefox
+
+1. Download the zip of the latest Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
+2. Navigate to `about:debugging#/runtime/this-firefox`.
+3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
+4. Done! Pin the extension to your top bar and use it by clicking on its icon.
+
+### Updating
+
+To update the extension, simply remove the existing version and install the newest version with the same steps. Check back here for new releases at least once a semester, as the extension is not updated automatically.
 
 ## How it works
 
