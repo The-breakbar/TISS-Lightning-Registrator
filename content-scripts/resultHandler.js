@@ -15,6 +15,17 @@ let updateTask = async (tabId, update) => {
 	}
 };
 
+// Helper function to get the number that you registered as
+let getRegisteredNumber = async (optionId, preregistration) => {
+	let pageDocument = await getPage();
+	let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+	let numberString = Array.from(options)
+		.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
+		.querySelector(`span[id*="${preregistration ? "waitingList" : "members"}"]`).innerText;
+
+	return numberString.split("/")[0].trim();
+};
+
 // Handle the case where the registration loop finished
 let handleResult = async (message) => {
 	let { response, tabId, attempts, time, optionId } = message;
@@ -68,13 +79,7 @@ let handleResult = async (message) => {
 	// Get the count of already registered students
 	let number;
 	if (success) {
-		let pageDocument = await getPage();
-		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
-		let numberString = Array.from(options)
-			.find((option) => pageType == "lva" || option.querySelector(`input[id*="${optionId}"]`))
-			.querySelector(`span[id*="${preregistration ? "waitingList" : "members"}"]`).innerText;
-
-		number = numberString.split("/")[0].trim();
+		number = await getRegisteredNumber(optionId, preregistration);
 		console.log("Registered as number " + number);
 	}
 
@@ -95,6 +100,21 @@ let handleRefreshTimeout = async (tabId) => {
 		status: "failure",
 		expiry: Date.now() + TASK_EXPIRY,
 		error: "registration did not open"
+	};
+
+	updateTask(tabId, update);
+};
+
+// Handle the case where the registration was processed internally, but the response was an error
+let handleErrorRegistration = async (tabId, optionId, time) => {
+	let number = await getRegisteredNumber(optionId);
+	console.log("Registered as number " + number);
+
+	let update = {
+		status: "success",
+		expiry: Date.now() + TASK_EXPIRY,
+		number,
+		time
 	};
 
 	updateTask(tabId, update);

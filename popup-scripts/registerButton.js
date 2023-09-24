@@ -2,7 +2,7 @@
 // It also handles the enabling/disabling of the button and the display of info messages
 
 const TIME_DEVIATION_MAX = 30000; // 30 seconds
-const TASK_EXPIRY = 70000;
+const TASK_EXPIRY = 120000; // 2 minutes
 let registerButton = document.getElementById("register-button");
 
 // Listener for the option select, it enables the register button if all conditions are met

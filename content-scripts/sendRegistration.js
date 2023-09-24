@@ -20,7 +20,7 @@
 // Define general registration parameters
 const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
 const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
-const MAX_ATTEMPTS = 3; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
+const MAX_ATTEMPTS = 5; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
 // To not get redirected to a blank window handler page, the request needs a cookie containing the dsrid value and the ClientWindow id
@@ -159,7 +159,26 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 			if (attempts > 1) {
 				// Refresh the page and get the ViewState
 				logExactTime("Refreshing for new ViewState...");
-				viewState = (await getPage()).querySelector(`input[name="javax.faces.ViewState"]`).value;
+				let pageDocument = await getPage();
+
+				// Check if we're registered already
+				let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+				let button;
+				if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6x");
+				else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
+
+				// If the button says we're already registered, stop the loop
+				// This handles the exceptionally rare case that the registration was processed internally, but the response was an error
+				if (["Deregistration", "Abmelden"].includes(button?.value)) {
+					logExactTime("Registered already through error response, stopping...");
+					let time = Date.now() - timeStart;
+					logExactTime(`Registration loop finished (${time}ms)`);
+					handleErrorRegistration(tabId, optionId, time);
+					return;
+				}
+
+				// Otherwise just get the ViewState and continue
+				viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
 			}
 
 			// Throws an error here if the request fails in any way
@@ -171,7 +190,7 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 		} catch (error) {
 			// This is for the very rare case that the request fails, due to unknown reasons
 			// At this point the loop will just try again, however generally at this point the other requests will also fail
-			logExactTime(error.message);
+			console.log(error);
 			logExactTime(`Attempt number ${attempts} failed`);
 		}
 	}
