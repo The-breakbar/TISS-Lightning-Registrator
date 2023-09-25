@@ -8,7 +8,7 @@ The extension streamlines registrations, working quietly in the background. You 
 
 ## Installing
 
-The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc) as well as Firefox. The extension is not available on an extension store, it has to be installed manually with the following steps:
+The extension will be available on extension stores soon, until then it has to be installed manually. The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc) as well as Firefox.
 
 ### Chrome / Opera / Edge
 
@@ -25,6 +25,8 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 
 ### Firefox
 
+Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted. The extension will be available on the Firefox Add-ons store soon.
+
 1. Download the zip of the latest Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
 2. Navigate to `about:debugging#/runtime/this-firefox`.
 3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
@@ -32,7 +34,7 @@ The extension is available for Chrome and other Chromium browsers (Opera, Edge, 
 
 ### Updating
 
-To update the extension, simply remove the existing version and install the newest version with the same steps. Check back here for new releases at least once a semester, as the extension is not updated automatically.
+To update the extension, simply remove the existing version and install the newest version with the same steps.
 
 ## How it works
 
