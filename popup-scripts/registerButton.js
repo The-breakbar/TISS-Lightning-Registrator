@@ -57,7 +57,7 @@ registerButton.addEventListener("click", async () => {
 	// This is not a perfect solution, if the request fails, then the time is not checked
 	// However this should only happen very rarely, as most system clocks don't deviate that much
 	let timeOverride;
-	const timeResponse = await fetch("http://worldtimeapi.org/api/timezone/Europe/Vienna");
+	const timeResponse = await fetch("https://worldtimeapi.org/api/timezone/Europe/Vienna");
 	if (timeResponse.ok) {
 		// If response is fine, extract the timestamp
 		const data = await timeResponse.json();
