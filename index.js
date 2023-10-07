@@ -10,7 +10,7 @@ initTaskRemovalTimeouts();
 chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	tabId = tabs[0].id;
 	let tabUrl = tabs[0].url;
-	if (!/https:\/\/.*tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
+	if (!/https:\/\/tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
 
 	// Determine type of registration
 	if (/courseRegistration/.test(tabUrl)) pageType = "lva";

@@ -9,9 +9,9 @@
 	"content_scripts": [
 		{
 			"matches": [
-			  "https://*.tiss.tuwien.ac.at/education/course/courseRegistration*",
-			  "https://*.tiss.tuwien.ac.at/education/course/groupList*",
-			  "https://*.tiss.tuwien.ac.at/education/course/examDateList*"
+			  "https://tiss.tuwien.ac.at/education/course/courseRegistration*",
+			  "https://tiss.tuwien.ac.at/education/course/groupList*",
+			  "https://tiss.tuwien.ac.at/education/course/examDateList*"
 			],
 			"js": [
 				"./content-scripts/getPageInfo.js",
