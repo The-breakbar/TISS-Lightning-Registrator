@@ -94,7 +94,7 @@ let refreshLoop = async (optionId, slot) => {
 		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
 
 		let button;
-		if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6t");
+		if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6z");
 		else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
 
 		// If the button was found, extract the ViewState
@@ -219,7 +219,7 @@ const CONFIRM_DATA = {
 	regForm_SUBMIT: "1"
 };
 const LVA_DATA = {
-	"registrationForm:j_id_6t": "Register",
+	"registrationForm:j_id_6z": "Register",
 	registrationForm_SUBMIT: "1"
 };
 // The group and exam data needs the id of the option to be inserted

@@ -37,7 +37,7 @@ let handleResult = async (message) => {
 			status: "failure",
 			expiry: Date.now() + TASK_EXPIRY,
 			time,
-			error: `registration attempted ${attempts} times`
+			error: `Registration attempted ${attempts} times`
 		};
 		updateTask(tabId, update);
 
@@ -47,13 +47,13 @@ let handleResult = async (message) => {
 	// At this point we still assume that the registration was not successful, as we have to check the response message
 	let success = false;
 	let preregistration = false;
-	let errorMessage = "unable to register for this option";
+	let errorMessage = "Unable to register for this option";
 	let responseDocument = new DOMParser().parseFromString(response, "text/html");
 	let responseInfoText = responseDocument.querySelector("#confirmForm .staticInfoMessage").innerText;
 
 	// Check if the registration wasn't fast enough and ended up on the waiting list
 	if (/(warteliste|waiting list)/i.test(responseInfoText)) {
-		errorMessage = "on waiting list";
+		errorMessage = "On waiting list";
 	}
 
 	// Check if the response message contains the success message
@@ -99,7 +99,7 @@ let handleRefreshTimeout = async (tabId) => {
 	let update = {
 		status: "failure",
 		expiry: Date.now() + TASK_EXPIRY,
-		error: "registration did not open"
+		error: "Registration did not open"
 	};
 
 	updateTask(tabId, update);
