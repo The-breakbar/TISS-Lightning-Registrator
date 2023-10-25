@@ -44,4 +44,4 @@ As the extension is based very tightly on the TISS website, any future changes t
 
 ## Bug reports
 
-All bug reports are appreciated! If you find any bugs, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues). Error messages can be found in the console of the tab where the extension was used (they're only present as long as you don't refresh or change the page). There might also be an "Errors" button on the browser settings page where the extension was installed. It contains errors from the pop-up window, as those are not logged to the regular console.
+All bug reports are appreciated! If you find any problems, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues).
