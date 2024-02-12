@@ -8,10 +8,10 @@
 	--text-color: #ffffff;
 	--link-color: #60daf0;
 	--border-radius: 6px;
-	
+
 	--shadow-strong: rgba(0, 0, 0, 0.4) 0px 3px 8px;
 	--shadow: rgba(0, 0, 0, 0.2) 0px 3px 8px;
-	
+
 	--success: #0d9947;
 	--success-border: #2bc76c;
 	--warning: #be7b16;
@@ -38,14 +38,13 @@ main {
 }
 
 /* Set transitions for hover effects and button clicks */
-select, button {
-	transition:
-		filter ease-in-out 0.2s,
-		border-radius ease-in-out 0.2s,
-		transform ease-in-out 0.15s;
+select,
+button {
+	transition: filter ease-in-out 0.2s, border-radius ease-in-out 0.2s, transform ease-in-out 0.15s;
 }
 
-select:hover, button:hover {
+select:hover,
+button:hover {
 	filter: brightness(1.1);
 }
 
@@ -58,7 +57,7 @@ header {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	
+
 	background-color: var(--header);
 	color: var(--text-color);
 	text-align: center;
@@ -76,7 +75,7 @@ h1 {
 
 /* Sections and their elements */
 section {
-	margin: 14px
+	margin: 14px;
 }
 
 section > * + * {
@@ -109,16 +108,10 @@ section[name="register"] select {
 	cursor: pointer;
 
 	/* Little arrow */
-	background-image:
-    	linear-gradient(45deg, transparent 50%, var(--secondary) 50%),
-    	linear-gradient(135deg, var(--secondary) 50%, transparent 50%);
-	background-position:
-		calc(100% - 20px) 12px,
-		calc(100% - 12px) 12px;
-		
-	background-size:
-		8px 8px,
-		8px 8px;
+	background-image: linear-gradient(45deg, transparent 50%, var(--secondary) 50%), linear-gradient(135deg, var(--secondary) 50%, transparent 50%);
+	background-position: calc(100% - 20px) 12px, calc(100% - 12px) 12px;
+
+	background-size: 8px 8px, 8px 8px;
 	background-repeat: no-repeat;
 }
 
@@ -140,7 +133,8 @@ section[name="register"] button {
 }
 
 /* Disabled selects and buttons */
-section[name="register"] select:disabled, section[name="register"] button:disabled {
+section[name="register"] select:disabled,
+section[name="register"] button:disabled {
 	cursor: not-allowed;
 	filter: grayscale(1);
 }
@@ -156,7 +150,6 @@ h2 {
 	font-size: 16px;
 	font-weight: normal;
 	text-transform: uppercase;
-	
 }
 
 /* Show the "No tasks" message when there are no tasks */
@@ -169,7 +162,6 @@ h2 {
 #task-info:only-of-type {
 	display: block;
 }
-
 
 /* Task elements */
 section[name="tasks"] > * + * {
@@ -224,6 +216,7 @@ section[name="tasks"] .failure h3 {
 
 /* Footer */
 footer {
+	position: relative;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -236,6 +229,14 @@ footer {
 
 .github-icon {
 	height: 24px;
+}
+
+footer .version {
+	position: absolute;
+	right: 4px;
+	bottom: 4px;
+	opacity: 0.4;
+	font-size: 10px;
 }
 
 /* Colors for the different statuses */
