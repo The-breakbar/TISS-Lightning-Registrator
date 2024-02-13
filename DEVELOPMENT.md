@@ -2,7 +2,7 @@
 
 This is a short summary of the technical part of the extension and how it was developed. It is meant as a reference for the internal TISS API, as well as documentation for the development of the extension.
 
-TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](https://github.com/mangei/tissquickregistrationscript) by Manuel Geier. The script is great, however there are various parts of it which have potential for improvement (additionally it is no longer maintained). The main goal of this extension was not to make a better version of the script, but to create a completely new tool which would be faster, more reliable and easier to use.
+TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](https://github.com/mangei/tissquickregistrationscript) by Manuel Geier. The script is great; however, there are various parts of it that have potential for improvement (additionally, it is no longer maintained). The main goal of this extension was not to make a better version of the script, but to create a completely new tool that would be faster, more reliable and easier to use.
 
 ## Table of contents
 
@@ -19,7 +19,7 @@ TISS Lightning Registrator was inspired by the [TISS Quick Registration Script](
 
 ## Overview
 
-Development started with the mentality that everything a user can do on a website, can also be replicated with Javascript. Generally, this is true, however sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API, however you can only do things like look up people and LVAs, but not register for anything. The only way to register is to use the website itself. This meant that the extension had to replicate the HTTP requests by reverse-engineering the website.
+Development started with the mentality that everything a user can do on a website, can also be replicated with Javascript. While this is generally true, sometimes it might be more difficult than expected, and this case was unfortunately one of those times. TISS does have a nice REST API; however, you can only do things like look up people and LVAs, but not register for anything. The only way to register is to use the website itself. This meant that the extension had to replicate the HTTP requests by reverse-engineering the website.
 
 It took quite a while until the first request was replicated, and initial testing unfortunately revealed that you could not skip any steps of the registration process, and had to follow the same steps as a regular user. This resulted in this simple registration flow:
 
@@ -27,7 +27,7 @@ It took quite a while until the first request was replicated, and initial testin
 - Send the request for pressing the register button
 - Send the request for confirming the registration
 
-While this doesn't seem too complicated, every step had its own challenges and problems which had to be solved. Managing to execute the whole registration process for the first time was a big milestone, and took quite a bit of time and effort. The following sections will go into detail about each step and how it was solved.
+While this doesn't seem too complicated, every step had its own challenges and problems that had to be solved. Managing to execute the whole registration process for the first time was a big milestone, and took quite a bit of time and effort. The following sections will go into detail about each step and how it was solved.
 
 Please note that the extension does not handle authentication, it needs the user to be logged in to TISS beforehand. Authentication with the server happens over cookies, which are passed along with every request. If you are looking for a way to automatically log in to TISS, there is a great [guide](https://github.com/flofriday/TU_Wien_Addressbook#how-does-the-app-log-in-to-get-student-information) by flofriday on how to do that.
 
@@ -37,19 +37,19 @@ Before going into the registration process, it is important to know what TISS us
 
 ## Step 1: Refreshing the page
 
-As part of the performance requirements (as well as for user experience), it was essential that all requests (including refreshes) were done inside of Javascript, so that none of the images/css of the response would start to load (as only the HTML is needed). For a refresh, this could be achieved with a simple GET request with a `fetch()` of the current url, however this causes a problem:
+As part of the performance requirements (as well as for the user experience), it was essential that all requests (including refreshes) were done inside Javascript, so that none of the images or CSS of the response would start to load (as only the HTML is needed). For a refresh, this could be achieved with a simple GET request with a `fetch()` of the current url, but this causes a problem:
 
 If you have been attentive, you might have noticed that each time you refresh the page or click on a link, the url changes while the page is loading. This is because you are always redirected to a loading page first, which then redirects you to the page you wanted to go to. This is unfortunately very annoying for our fetch request, as it will receive the loading page as the response.
 
-If you are an all-knowing entity (or have been looking through the source code of the loading page), you might deduct that the loading page is a so called "window handler" from the ["Multi-Window Handling" part of the JSF Module from Deltaspike](https://deltaspike.apache.org/documentation/jsf.html#Multi-WindowHandling). Fortunately their documentation explains how the window handler works:
+If you are an all-knowing entity (or have been looking through the source code of the loading page), you might deduce that the loading page is a so-called "window handler" from the ["Multi-Window Handling" part of the JSF Module from Deltaspike](https://deltaspike.apache.org/documentation/jsf.html#Multi-WindowHandling). Fortunately, their documentation explains how the window handler works:
 
 > Each GET request results in an intermediate small HTML page (aka "windowhandler").
 
 > ... a unique token (called dsrid) will be generated for the current request and added to the URL. In addition a cookie with with the dsrid/dswid will be added. On the server side, the verified windowId will be extracted from the cookie. For POST request detection, the windowId will be added as hidden input to all forms.
 
-So if we generate this unique token and create the cookie before sending our GET request, we should immediately receive the page we wanted to go to, instead of the loading page. For this we have to make a small detour and explain how the token is generated.
+So if we generate this unique token and create the cookie before sending our GET request, we should immediately receive the page we wanted to go to, instead of the loading page. For this, we have to make a small detour and explain how the token is generated.
 
-At this point there was serious concern that it might not be possible to replicate the token generation on the client side, as it might be using some server side magic. Additionally the documentation had no mention of how the token is generated, so the only way to find out was to look through the source code.
+At this point, there was serious concern that it might not be possible to replicate the token generation on the client side, as it might be using some server-side magic. Additionally, the documentation made no mention of how the token is generated, so the only way to find out was to look through the source code.
 
 At the bottom of the window handler page, there is a small script which is responsible for the redirect:
 
@@ -65,13 +65,13 @@ The `handleWindowId` function is found in [`windowIdHandling.js`](https://tiss.t
 var requestToken = dswh.utils.generateNewRequestToken();
 ```
 
-`dswh` obviously stands for "Deltaspike Window Handler", so this uses the utilities of that module. Those utilities are found in [`windowhandler.js`](https://tiss.tuwien.ac.at/education/javax.faces.resource/windowhandler.js.xhtml?ln=deltaspike), and while difficult to read, the file is fortunately only minimized, but not obfuscated. After a quick search you can find the sophisticated token generation algorithm in this function:
+`dswh` obviously stands for "Deltaspike Window Handler", so this uses the utilities of that module. Those utilities are found in [`windowhandler.js`](https://tiss.tuwien.ac.at/education/javax.faces.resource/windowhandler.js.xhtml?ln=deltaspike), and while difficult to read, the file is fortunately only minimized, but not obfuscated. After a quick search, you can find the sophisticated token generation algorithm in this function:
 
 ```javascript
 generateNewRequestToken:function(){return""+Math.floor(999*Math.random())}
 ```
 
-So it turns out that the token is just a random number between 0 and 999. This is great news, as it means that we don't even have to replicate the token generation, we can just hardcode it. Checking the cookies of the site reveals the exact format of the cookie, which results in the following code for the extension (the `windowId` is extracted from the url parameters):
+So it turns out that the token is just a random number between 0 and 999. This is great news, as it means that we don't even have to replicate the token generation; we can just hardcode it. Checking the cookies of the site reveals the exact format of the cookie, which results in the following code for the extension (the `windowId` is extracted from the url parameters):
 
 ```javascript
 const DSRID_VALUE = 1;
@@ -100,17 +100,17 @@ dspwid: 8203
 
 > See the [API Docs](#api-docs) for a detailed description of the request body.
 
-Although this specific body is for a group registration, they don't vary much between LVA/group/exam. Most of the body is pretty straightforward, the first entry is just the HTML id of the register button as the key, and the text of the button as the value. The second entry is always the same, and the last 2 entries are just the window id, which can be extracted from the url.
+Although this specific body is for a group registration, they don't vary much between LVA/group/exam. Most of the body is pretty straightforward; the first entry is just the HTML id of the register button as the key, and the text of the button as the value. The second entry is always the same, and the last 2 entries are just the window id, which can be extracted from the url.
 
 ### ViewState
 
-The only thing that is not clear is the ViewState. It changes for every request and repeating an already sent request a second time doesn't work. Fortunately there is a great [article](https://book.hacktricks.xyz/pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization) by HackTricks which talks about the ViewState and its potential vulnerabilities (although they don't apply to TISS).
+The only thing that is not clear is the ViewState. It changes for every request, and repeating an already-sent request a second time doesn't work. Fortunately, there is a great [article](https://book.hacktricks.xyz/pentesting-web/deserialization/java-jsf-viewstate-.faces-deserialization) by HackTricks that talks about the ViewState and its potential vulnerabilities (although they don't apply to TISS).
 
 > JSF makes use of ViewStates (in addition to sessions) to store the current state of the view (e.g. what parts of the view should currently be displayed).
 
 > JSF ViewStates are typically automatically embedded into HTML forms as hidden field with the name `javax.faces.ViewState`. They are sent back to the server if the form is submitted.
 
-The ViewState string itself is a serialized Java object, although what it represents doesn't matter as we simply pass it along. The hidden field in TISS looks like this:
+The ViewState string itself is a serialized Java object, although what it represents doesn't matter, as we simply pass it along. The hidden field in TISS looks like this:
 
 ```html
 <input type="hidden" name="javax.faces.ViewState" id="j_id__v_0:javax.faces.ViewState:2" value="NkE5RjdGMjA1QUVCQ0IFRDAwMDAwMDFG" autocomplete="off" />
@@ -121,7 +121,7 @@ Together with some testing, the following constraints were found:
 - A ViewState "represents" the page it is found in, and can only be used for actions that can be performed on that page
 - A ViewState can only be used once, repeating a request with the same ViewState will result in an error
 
-These constraints are unfortunately also the reason why the extension can't skip any steps of the registration process. The first ViewState isn't valid until the register button exists and the second ViewState is dependant on the first request. This forces us into the previously mentioned registration process:
+These constraints are unfortunately also the reason why the extension can't skip any steps of the registration process. The first ViewState isn't valid until the register button exists and the second ViewState is dependent on the first request. This forces us into the previously mentioned registration process:
 
 - Refresh the page until the registration opens (the register button exists)
 - Extract the ViewState and use it to send the first request
@@ -138,7 +138,7 @@ bodyData["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="java
 
 ## Step 3: The second request
 
-The second request to confirm the registration isn't much different from the first one, the button id is constant and the only thing needed is the ViewState from the previous response. While sending the request doesn't provide any other obstacles, there is still one more problem: Exam Slots. Some exams (mostly oral exams) have multiple slots, where you can register for one of them. This is done during the confirmation page (after the first request) with a dropdown menu which contains all the available slots. The value of the selected slot is then sent with the second request.
+The second request to confirm the registration isn't much different from the first one; the button id is constant, and the only thing needed is the ViewState from the previous response. While sending the request doesn't provide any other obstacles, there is still one more problem: Exam Slots. Some exams (mostly oral exams) have multiple slots, where you can register for one of them. This is done during the confirmation page (after the first request) with a drop-down menu that contains all the available slots. The value of the selected slot is then sent with the second request.
 
 The `<option>` elements of the slot select contain two things: The text of the slot and a value attribute, which is some unique number.
 
@@ -161,7 +161,7 @@ The problem arises from the fact that we have to provide the user with a way to 
 </tr>
 ```
 
-This forces us to do string comparisons between the text of the slot and the text of the option, which while not being ideal, is the only way to do it. To keep it as simple as possible, the extension just checks if the slot start and end time are contained in the option text (it is unknown if slots can be named).
+This forces us to do string comparisons between the text of the slot and the text of the option, which, while not being ideal, is the only way to do it. To keep it as simple as possible, the extension just checks if the slot start and end time are contained in the option text (it is unknown if slots can be named).
 
 ```javascript
 if (slot) {
@@ -178,17 +178,17 @@ With this, the registration process is complete and the extension can register f
 During regular conditions, the extension can register in less than a second, with the fastest times being around 250ms. Note that this includes the time needed for the first refresh. Depending on how you interpret "registration duration", this can be included or not. The time that the extension shows when a registration succeeds does not include it (it is supposed to represent the time the extension took, to do the same thing the user would have had to do). The timeline looks like this:
 
 0. Refresh loop, usually with a frequency of 100-300ms per refresh
-1. (At this point the registration has opened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, this might already be delayed, as the registration might open while the previous request is still being processed)
+1. (At this point, the registration has opened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, this might already be delayed, as the registration might open while the previous request is still being processed)
 2. Send the first request (100-300ms)
 3. Send the second request (up to 10 seconds, depending on server traffic)
 
-Of course one of the biggest factors is the user's internet connection. Additionally the response time of the second request is highly dependent on how much traffic the TISS servers have to handle at that time. In the best case it takes 100-300ms like the other requests, but it can also take longer. Note that this does not mean that the extension is slow, it is just waiting for the server to respond (and so is every other user that is trying to register at the same time).
+Of course one of the biggest factors is the user's internet connection. Additionally, the response time of the second request is highly dependent on how much traffic the TISS servers have to handle at that time. In the best case it takes 100-300ms like the other requests, but it can also take longer. Note that this does not mean that the extension is slow, it is just waiting for the server to respond (and so is every other user that is trying to register at the same time).
 
-While there is room for improvement, about 90% of the time is spent just waiting for the server to respond. An attempt could be made to time the refresh so that the registration opens just before the refresh, however this would require a lot of testing and would be difficult to get right. Throughout countless live tests, including many high traffic registrations, the extension managed to register every time, so the performance is sufficient for now.
+While there is room for improvement, about 90% of the time is spent just waiting for the server to respond. An attempt could be made to time the refresh so that the registration opens just before the refresh; however, this would require a lot of testing and would be difficult to get right. Throughout countless live tests, including many high-traffic registrations, the extension managed to register every time, so the performance is sufficient for now.
 
 ## Conclusion
 
-Hopefully this was an interesting read, even if you're not planning to implement this API yourself. Reverse-engineering the TISS website was a very interesting experience, and it turned a small project that I wanted to just make for myself, into a full-fledged extension which I can easily share with others. If you have any questions or suggestions, feel free to open an issue or a pull request. Additionally you can easily reach me as "breakbar" on Discord.
+Hopefully, this was an interesting read, even if you're not planning to implement this API yourself. Reverse-engineering the TISS website was a very interesting experience, and it turned a small project that I wanted to just make for myself, into a full-fledged extension that I can easily share with others. If you have any questions or suggestions, feel free to open an issue or a pull request. Additionally, you can easily reach me as "breakbar" on Discord.
 
 # API Docs
 
