@@ -1,6 +1,6 @@
 # TISS Lightning Registrator
 
-[![Screenshot of the extension being shown in three different browsers](images/Screenshots.png)](https://chromewebstore.google.com/detail/tiss-lightning-registrato/aafcdagpbbpnjpnfofompbhefgpddimi)
+[![Screenshot of the extension being shown in three different browsers](images/Screenshots.png)](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
 
 TISS Lightning Registrator is a browser extension that takes the hassle out of TISS registrations. Automatically sign up for courses, groups, or exams as soon as they open. Start the extension before a registration begins, and experience lightning-fast registration that is often completed in less than a second.
 
@@ -8,7 +8,7 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 
 ### Chrome / Opera / Edge
 
-#### [**Download from the Chrome Web Store**](https://chrome.google.com/webstore/detail/tiss-lightning-registrato/aafcdagpbbpnjpnfofompbhefgpddimi)
+#### [**Download from the Chrome Web Store**](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
 
 ### Firefox
 
