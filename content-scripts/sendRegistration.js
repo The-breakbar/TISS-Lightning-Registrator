@@ -48,7 +48,7 @@ let logExactTime = (...message) => {
 let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+client.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action != "sendRegistration") return;
 	logExactTime("Received registration request...");
 
@@ -130,11 +130,11 @@ let refreshLoop = async (optionId, slot) => {
 let updateTaskToRunning = async () => {
 	let task;
 	while (!task) {
-		task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+		task = (await client.storage.local.get(tabId.toString()))[tabId];
 	}
 	if (task.status == "queued") {
 		task.status = "running";
-		chrome.storage.session.set({ [tabId]: task });
+		client.storage.local.set({ [tabId]: task });
 	}
 };
 

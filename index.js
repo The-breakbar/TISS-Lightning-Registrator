@@ -7,7 +7,7 @@ let tabId;
 initTaskRemovalTimeouts();
 
 // Check if tab is a registration page
-chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+client.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	tabId = tabs[0].id;
 	let tabUrl = tabs[0].url;
 	if (!/https:\/\/tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
@@ -25,7 +25,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
 	// This is necessary because the popup can be opened before the content script has loaded
 	while (!pageInfo) {
 		// Catch empty because it just means the tab hasn't loaded yet
-		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
+		pageInfo = await client.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
 	}
 
 	// Hide loading text
