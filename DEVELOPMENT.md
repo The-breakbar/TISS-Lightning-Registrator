@@ -192,9 +192,6 @@ Hopefully this was an interesting read, even if you're not planning to implement
 
 # API Docs
 
-> [!IMPORTANT]
-> This documentation has been updated and is valid as of October 7th, 2023. Any future changes will be updated as soon as possible. See the [API Changelog](#api-changelog) for a detailed list of changes.
-
 > [!NOTE]
 > While this documentation tries to be as complete as possible, certain things have not been thoroughly tested and are unknown. It is sufficient for this extension, however that might not be the case for every use case. If you find any mistakes or have additional information, please open an issue or a pull request.
 
@@ -206,7 +203,6 @@ Hopefully this was an interesting read, even if you're not planning to implement
 - [Exam endpoint](#exam-endpoint---educationcourseexamdatelistxhtml-post)
 - [Confirm endpoint](#confirm-endpoint---educationcourseregisterxhtml-post)
 - [Example curl commands](#example-curl-commands)
-- [API Changelog](#api-changelog)
 
 ## General notes
 
@@ -225,7 +221,7 @@ The request body needs to contain the following key-value pairs:
 
 | Key name                   | Value                  | Notes                                                                                                                            |
 | -------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `registrationForm:j_id_6z` | `"Register"`           | Key name is the HTML id of the register button<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `registrationForm:<id>`    | `"Register"`           | Key name is the HTML id of the register button<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
 | `registrationForm_SUBMIT`  | `1`                    |
 | `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                              |
 | `javax.faces.ClientWindow` | Same value as `dspwid` |
@@ -237,13 +233,13 @@ Sending this request mimics the register button for a group registration. The `<
 
 The request body needs to contain the following key-value pairs:
 
-| Key name                        | Value                  | Notes                                                                                                                                                                                                |
-| ------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `groupContentForm:<id>:j_id_a1` | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every group option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
-| `groupContentForm_SUBMIT`       | `1`                    |
-| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                  |
-| `javax.faces.ClientWindow`      | Same value as `dspwid` |
-| `javax.faces.ViewState`         | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                          |
+| Key name                   | Value                  | Notes                                                                                                                                                                                                |
+| -------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `groupContentForm:<id>`    | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every group option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `groupContentForm_SUBMIT`  | `1`                    |
+| `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                  |
+| `javax.faces.ClientWindow` | Same value as `dspwid` |
+| `javax.faces.ViewState`    | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                          |
 
 ## Exam endpoint - /education/course/examDateList.xhtml (POST)
 
@@ -251,13 +247,13 @@ Sending this request mimics the register button for an exam registration. The `<
 
 The request body needs to contain the following key-value pairs:
 
-| Key name                        | Value                  | Notes                                                                                                                                                                                               |
-| ------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `examDateListForm:<id>:j_id_9u` | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every exam option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
-| `examDateListForm_SUBMIT`       | `1`                    |
-| `dspwid`                        | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                 |
-| `javax.faces.ClientWindow`      | Same value as `dspwid` |
-| `javax.faces.ViewState`         | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                         |
+| Key name                   | Value                  | Notes                                                                                                                                                                                               |
+| -------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `examDateListForm:<id>`    | `"Register"`           | Key name is the HTML id of the register button<br />The `<id>` part of the key is different for every exam option<br />Value is the text of the button<br />`"Anmelden"` is also valid as the value |
+| `examDateListForm_SUBMIT`  | `1`                    |
+| `dspwid`                   | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                 |
+| `javax.faces.ClientWindow` | Same value as `dspwid` |
+| `javax.faces.ViewState`    | A valid ViewState      | See [ViewState](#viewstate)                                                                                                                                                                         |
 
 ## Confirm endpoint - /education/course/register.xhtml (POST)
 
@@ -267,7 +263,7 @@ The request body needs to contain the following key-value pairs:
 
 | Key name                          | Value                  | Notes                                                                                                                                                                                                                                                                           |
 | --------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `regForm:j_id_30`                 | `"Register"`           | Key name is the HTML id of the register button<br />`"Anmelden"` is also valid as the value                                                                                                                                                                                     |
+| `regForm:<id>`                    | `"Register"`           | Key name is the HTML id of the register button<br />`"Anmelden"` is also valid as the value                                                                                                                                                                                     |
 | `regForm_SUBMIT`                  | `1`                    |
 | `dspwid`                          | A window id            | The id is found in the url as the "dswid" parameter                                                                                                                                                                                                                             |
 | `javax.faces.ClientWindow`        | Same value as `dspwid` |
@@ -281,7 +277,7 @@ These are some example curl commands that show how to perform the requests. Make
 - Cookies (`JSESSIONID`, `TISS_AUTH`, `_tiss_session`)
 - ViewState (`javax.faces.ViewState`)
 - Window id (`dspwid`, `javax.faces.ClientWindow`)
-- Group/Exam option id (`groupContentForm:<id>:j_id_a1` / `examDateListForm:<id>:j_id_9u`)
+- Button id (`registrationForm:<id>` / `groupContentForm:<id>` / `examDateListForm:<id>`)
 
 Also note that the [--data-urlencode](https://everything.curl.dev/http/post/url-encode) flag is used (for the `application/x-www-form-urlencoded` content type), however that requires the key of the key-value pairs to be already encoded. For example, the key `registrationForm:j_id_6z` is encoded as `registrationForm%3Aj_id_6z`.
 
@@ -336,7 +332,3 @@ curl --location 'https://tiss.tuwien.ac.at/education/course/register.xhtml' \
 --data-urlencode 'javax.faces.ClientWindow=8358' \
 --data-urlencode 'javax.faces.ViewState=RUVBN0FTEUZEMUI3QjQzNTAwMDAwMDQw'
 ```
-
-## API Changelog
-
-- 2023-10-07: LVA button id changed from `registrationForm:j_id_6t` to `registrationForm:j_id_6z`
