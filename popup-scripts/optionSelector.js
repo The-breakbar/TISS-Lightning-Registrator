@@ -16,7 +16,7 @@ let initOptionSelector = async () => {
 	document.querySelector(`section[name="register"]`).hidden = false;
 
 	// Check if there is already an ongoing registration task in this tab
-	let ongoingTask = (await chrome.storage.session.get(tabId.toString()))[tabId];
+	let ongoingTask = (await client.storage.local.get(tabId.toString()))[tabId];
 	let finished = ongoingTask?.status == "success" || ongoingTask?.status == "failure";
 	if (ongoingTask && !finished) {
 		// Return, as this tab shouldn't have any interaction options
@@ -95,7 +95,7 @@ let initOptionSelector = async () => {
 // This handled the relevant messages and adds the slots of the option has any
 optionSelect.addEventListener("change", (event) => {
 	// If there are ongoing tasks, show warning message
-	chrome.storage.session.get(null).then((allTasks) => {
+	client.storage.local.get(null).then((allTasks) => {
 		let ongoingTasks = Object.values(allTasks).filter((task) => task.status != "success" && task.status != "failure");
 		if (ongoingTasks.length > 0) {
 			document.getElementById("info-multiple-tasks").hidden = false;

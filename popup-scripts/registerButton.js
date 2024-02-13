@@ -71,7 +71,7 @@ registerButton.addEventListener("click", async () => {
 	}
 
 	// Send the registration request to the content script
-	await chrome.tabs.sendMessage(tabId, {
+	await client.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
 		timestamp: optionInfo.start,
@@ -92,5 +92,5 @@ registerButton.addEventListener("click", async () => {
 		slot,
 		expiry: Math.max(Date.now(), optionInfo.start) + TASK_EXPIRY
 	};
-	chrome.storage.session.set({ [tabId.toString()]: task });
+	client.storage.local.set({ [tabId.toString()]: task });
 });

@@ -8,8 +8,8 @@ const STATUS_TEXT = {
 	failure: "Failure"
 };
 
-chrome.storage.onChanged.addListener((changes, area) => {
-	if (area != "session") return;
+client.storage.onChanged.addListener((changes, area) => {
+	if (area != "local") return;
 
 	// If the update is for this tab, update the message (tabId is from sendRegistration.js)
 	if (!changes[tabId]?.newValue) return;

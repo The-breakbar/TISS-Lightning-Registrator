@@ -24,6 +24,8 @@
 //     option.slot.end : End time of slot
 //     option.slot.participants : Registered/available participants
 
+const client = typeof browser === "undefined" ? chrome : browser;
+
 // Determine page type (this variable is accessible from all other content scripts)
 let pageType;
 if (/courseRegistration/.test(window.location.href)) pageType = "lva";
@@ -50,7 +52,7 @@ if (expandElement) {
 }
 
 // Create object to store page info and bind main callback to message listener
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+client.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Check if the message is a request to get page info
 	if (message.action != "getPageInfo") return;
 

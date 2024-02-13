@@ -1,16 +1,29 @@
 # TISS Lightning Registrator
 
-![Screenshot of the extension being shown in three different browsers](images/Screenshots.png)
+[![Screenshot of the extension being shown in three different browsers](images/Screenshots.png)](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
 
-Introducing TISS Lightning Registrator, a handy browser extension that takes the hassle out of TISS registrations by automatically signing you up for LVAs, groups, or exams as soon as they open. Start the extension before a registration begins, and once it does, experience lightning-fast registration that is often completed in less than a second. Additionally this streamlined process works quietly in the background, allowing you to multitask and browse other tabs, while the extension handles the registration process efficiently.
+TISS Lightning Registrator is a browser extension that takes the hassle out of TISS registrations. Automatically sign up for courses, groups, or exams as soon as they open. Start the extension before a registration begins, and experience lightning-fast registration that is often completed in less than a second.
 
-## Installing
-
-The extension will be available on extension stores soon, until then it has to be installed manually. The extension is available for Chrome and other Chromium browsers (Opera, Edge, etc) as well as Firefox.
+## Download
 
 ### Chrome / Opera / Edge
 
-1. Download the zip of the latest release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
+[**Download from the Chrome Web Store**](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
+
+### Firefox
+
+Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and download the latest `TISS-Lightning-Registrator-<version>-Firefox.xpi` file (note the `.xpi` file extension). The browser will prompt you to install the extension, if not, drag the downloaded file into the browser.
+
+### Manual installation
+
+<details>
+<summary>Show manual installation instructions</summary>
+
+**This installation method is not recommended for regular users, as you will not receive updates this way.** This method should only be used for development purposes or if you are unable to use the other installation methods. New updates will have to be manually downloaded and installed.
+
+### Chrome / Opera / Edge
+
+1. Download the zip of the latest unpacked release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and extract it (or clone the repo).
 2. Navigate to the browser page of your installed extensions. It can be found under "Manage extensions" in your browser options or by going to the following links depending on your browser:
 
    - Chrome: `chrome://extensions`
@@ -19,20 +32,16 @@ The extension will be available on extension stores soon, until then it has to b
 
 3. Enable "Developer mode" in the top right (left side for Edge).
 4. Click the "Load unpacked extension" button and select the unpacked folder which you downloaded (make sure you select the folder which contains all the files).
-5. Done! Pin the extension to your top bar and use it by clicking on its icon.
 
 ### Firefox
 
-Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted. The extension will be available on the Firefox Add-ons store soon.
+Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted.
 
-1. Download the zip of the latest Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
+1. Download the zip of the latest unpacked Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it (or clone the repo).
 2. Navigate to `about:debugging#/runtime/this-firefox`.
 3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
-4. Done! Pin the extension to your top bar and use it by clicking on its icon.
 
-### Updating
-
-To update the extension, simply remove the existing version and install the newest version with the same steps.
+</details>
 
 ## How it works
 
@@ -44,4 +53,8 @@ As the extension is based very tightly on the TISS website, any future changes t
 
 ## Bug reports
 
-All bug reports are appreciated! If you find any bugs, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues). Error messages can be found in the console of the tab where the extension was used (they're only present as long as you don't refresh or change the page). There might also be an "Errors" button on the browser settings page where the extension was installed. It contains errors from the pop-up window, as those are not logged to the regular console.
+All bug reports are appreciated! If you find any problems, feel free to open an [issue](https://github.com/The-breakbar/TISS-Lightning-Registrator/issues).
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

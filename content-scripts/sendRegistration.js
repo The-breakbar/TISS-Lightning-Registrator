@@ -48,7 +48,7 @@ let logExactTime = (...message) => {
 let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+client.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	if (message.action != "sendRegistration") return;
 	logExactTime("Received registration request...");
 
@@ -81,25 +81,33 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	sendResponse();
 });
 
+// Helper function for getting the register button
+let getButtonFromPage = (page, optionId) => {
+	let options = page.querySelectorAll("#contentInner .groupWrapper");
+	let button;
+	if (pageType == "lva") button = options[0].querySelector(`input[id^="registrationForm"]`);
+	else
+		button = Array.from(options)
+			.map((option) => option.querySelector(`input[id*="${optionId}"]`))
+			.find((button) => button);
+	return button;
+};
+
 // Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 // Requests are sent in series at, if the button is not found after the specified time, the loop will stop
 let refreshLoop = async (optionId, slot) => {
 	let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
-	let viewState;
+	let viewState, buttonId;
 
 	while (!viewState && Date.now() < stopTime) {
 		logExactTime("Refreshing page...");
 		// Refresh the page and check if the button is on the page
 		let pageDocument = await getPage();
-		let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
+		let button = getButtonFromPage(pageDocument, optionId);
 
-		let button;
-		if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6z");
-		else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
-
-		// If the button was found, extract the ViewState
 		if (button) {
 			viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+			buttonId = button.id;
 		}
 	}
 
@@ -114,7 +122,7 @@ let refreshLoop = async (optionId, slot) => {
 	}
 
 	// Start the registration loop
-	registerLoop(viewState, optionId, slot);
+	registerLoop(viewState, buttonId, optionId, slot);
 };
 
 // Updates the status of the registration task
@@ -122,11 +130,11 @@ let refreshLoop = async (optionId, slot) => {
 let updateTaskToRunning = async () => {
 	let task;
 	while (!task) {
-		task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+		task = (await client.storage.local.get(tabId.toString()))[tabId];
 	}
 	if (task.status == "queued") {
 		task.status = "running";
-		chrome.storage.session.set({ [tabId]: task });
+		client.storage.local.set({ [tabId]: task });
 	}
 };
 
@@ -138,7 +146,7 @@ let updateTaskToRunning = async () => {
 // - While sending many requests at once, it has been observed that the response is an error, even if the registration was successfully processed internally
 //   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
 // The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
-let registerLoop = async (firstViewState, optionId, slot) => {
+let registerLoop = async (firstViewState, buttonId, optionId, slot) => {
 	logExactTime("Valid ViewState obtained, starting register loop...");
 
 	// Update the status of the registration task
@@ -160,12 +168,7 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 				// Refresh the page and get the ViewState
 				logExactTime("Refreshing for new ViewState...");
 				let pageDocument = await getPage();
-
-				// Check if we're registered already
-				let options = pageDocument.querySelectorAll("#contentInner .groupWrapper");
-				let button;
-				if (pageType == "lva") button = options[0].querySelector("#registrationForm\\:j_id_6x");
-				else button = Array.from(options).find((option) => option.querySelector(`input[id*="${optionId}"]`));
+				let button = getButtonFromPage(pageDocument, optionId);
 
 				// If the button says we're already registered, stop the loop
 				// This handles the exceptionally rare case that the registration was processed internally, but the response was an error
@@ -182,7 +185,7 @@ let registerLoop = async (firstViewState, optionId, slot) => {
 			}
 
 			// Throws an error here if the request fails in any way
-			response = await sendRequest(viewState, optionId, slot);
+			response = await sendRequest(viewState, buttonId, slot);
 
 			// Reaching this point means the request succeeded
 			// (Note that this doesn't mean the registration was successful, as the response has to be checked)
@@ -214,31 +217,9 @@ const GROUP_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/groupList.xht
 const EXAM_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/examDateList.xhtml";
 const CONFIRM_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/register.xhtml";
 
-const CONFIRM_DATA = {
-	"regForm:j_id_30": "Register",
-	regForm_SUBMIT: "1"
-};
-const LVA_DATA = {
-	"registrationForm:j_id_6z": "Register",
-	registrationForm_SUBMIT: "1"
-};
-// The group and exam data needs the id of the option to be inserted
-let getGroupData = (groupId) => {
-	let data = { groupContentForm_SUBMIT: "1" };
-	let idKey = `groupContentForm:${groupId}:j_id_a1`;
-	data[idKey] = "Register";
-	return data;
-};
-let getExamData = (examId) => {
-	let data = { examDateListForm_SUBMIT: "1" };
-	let idKey = `examDateListForm:${examId}:j_id_9u`;
-	data[idKey] = "Register";
-	return data;
-};
-
 // This function attempts to send the two POST requests required to register and returns a promise of the body of the second request
 // If any of the requests fail, it will throw an error (caused by the validateResponse function)
-let sendRequest = async (viewState, optionId, slot) => {
+let sendRequest = async (viewState, buttonId, slot) => {
 	// Define the request body
 	let bodyData = {
 		dspwid: windowId,
@@ -247,17 +228,18 @@ let sendRequest = async (viewState, optionId, slot) => {
 	};
 
 	// Create the body together with the additional required data and define endpoint
-	let targetUrl, body;
+	let targetUrl, firstBody;
 	if (pageType == "lva") {
 		targetUrl = LVA_ENDPOINT;
-		body = { ...bodyData, ...LVA_DATA };
+		firstBody = { ...bodyData, registrationForm_SUBMIT: "1" };
 	} else if (pageType == "group") {
 		targetUrl = GROUP_ENDPOINT;
-		body = { ...bodyData, ...getGroupData(optionId) };
+		firstBody = { ...bodyData, groupContentForm_SUBMIT: "1" };
 	} else if (pageType == "exam") {
 		targetUrl = EXAM_ENDPOINT;
-		body = { ...bodyData, ...getExamData(optionId) };
+		firstBody = { ...bodyData, examDateListForm_SUBMIT: "1" };
 	}
+	firstBody[buttonId] = "Register";
 
 	// Define the request payload
 	let payload = {
@@ -265,17 +247,20 @@ let sendRequest = async (viewState, optionId, slot) => {
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded"
 		},
-		body: new URLSearchParams(body).toString() // Encode the body as a query string
+		body: new URLSearchParams(firstBody).toString() // Encode the body as a query string
 	};
 
 	// Send the first request
-	logExactTime("Sending register request with body: ", body);
+	logExactTime("Sending register request with body: ", firstBody);
 	let firstResponse = await fetch(targetUrl, payload);
 	validateResponse(firstResponse);
 	let pageDocument = new DOMParser().parseFromString(await firstResponse.text(), "text/html");
 
-	// Get the new ViewState from the response and add it to the payload
-	bodyData["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+	// Get the new ViewState and button id from the response and add it to the payload
+	let secondBody = { ...bodyData, regForm_SUBMIT: "1" };
+	secondBody["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+	let confirmButton = pageDocument.querySelector(`#contentInner #regForm input`);
+	secondBody[confirmButton.id] = "Register";
 
 	// If the registration option has slots, get the slot id from the response and add it to the payload
 	if (slot) {
@@ -285,10 +270,10 @@ let sendRequest = async (viewState, optionId, slot) => {
 	}
 
 	// Update the body with the new data and encode it
-	payload.body = new URLSearchParams({ ...bodyData, ...CONFIRM_DATA }).toString();
+	payload.body = new URLSearchParams(secondBody).toString();
 
 	// Send the second request
-	logExactTime("Sending confirm request with body: ", { ...bodyData, ...CONFIRM_DATA });
+	logExactTime("Sending confirm request with body: ", secondBody);
 	let secondResponse = await fetch(CONFIRM_ENDPOINT, payload);
 	validateResponse(secondResponse);
 

@@ -1,17 +1,17 @@
 // This is a content script responsible for handling the results of the registration attempts
 const TASK_EXPIRY = 60000;
 
-// Helper function to update the task in the session storage
+// Helper function to update the task in local storage
 let updateTask = async (tabId, update) => {
 	let task;
 	// Just in case the task is not stored yet
-	// During regular operation it is always stored, but the execution might reach this point before it is added to session storage
+	// During regular operation it is always stored, but the execution might reach this point before it is added to local storage
 	while (!task) {
-		task = (await chrome.storage.session.get(tabId.toString()))[tabId];
+		task = (await client.storage.local.get(tabId.toString()))[tabId];
 	}
 	if (task.status == "queued" || task.status == "running") {
 		task = Object.assign(task, update);
-		chrome.storage.session.set({ [tabId]: task });
+		client.storage.local.set({ [tabId]: task });
 	}
 };
 
