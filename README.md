@@ -17,10 +17,7 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 <details>
 <summary>Show manual installation instructions</summary>
 
-> [!WARNING]
-> This installation method is not recommended for regular users, as you will not receive automatic updates.
-
-If preferred, the extension can be installed manually in developer mode. This method should only be used for development purposes or if you are unable to use the other installation methods.
+**This installation method is not recommended for regular users, as you will not receive automatic updates.** If preferred, the extension can be installed manually in developer mode. This method should only be used for development purposes or if you are unable to use the other installation methods.
 
 ### Chrome / Opera / Edge
 
