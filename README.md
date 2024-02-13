@@ -8,20 +8,22 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 
 ### Chrome / Opera / Edge
 
-#### [**Download from the Chrome Web Store**](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
+[**Download from the Chrome Web Store**](https://chromewebstore.google.com/detail/aafcdagpbbpnjpnfofompbhefgpddimi)
 
 ### Firefox
+
+Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and download the latest `TISS-Lightning-Registrator-<version>-Firefox.xpi` file (note the `.xpi` file extension). The browser will prompt you to install the extension, if not, drag the downloaded file into the browser.
 
 ### Manual installation
 
 <details>
 <summary>Show manual installation instructions</summary>
 
-**This installation method is not recommended for regular users, as you will not receive automatic updates.** If preferred, the extension can be installed manually in developer mode. This method should only be used for development purposes or if you are unable to use the other installation methods.
+**This installation method is not recommended for regular users, as you will not receive updates this way.** This method should only be used for development purposes or if you are unable to use the other installation methods. New updates will have to be manually downloaded and installed.
 
 ### Chrome / Opera / Edge
 
-1. Download the zip of the latest unpacked release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and extract it.
+1. Download the zip of the latest unpacked release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and extract it (or clone the repo).
 2. Navigate to the browser page of your installed extensions. It can be found under "Manage extensions" in your browser options or by going to the following links depending on your browser:
 
    - Chrome: `chrome://extensions`
@@ -35,13 +37,9 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 
 Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted.
 
-1. Download the zip of the latest Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it.
+1. Download the zip of the latest unpacked Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it (or clone the repo).
 2. Navigate to `about:debugging#/runtime/this-firefox`.
 3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
-
-### Updating
-
-To update the extension, simply remove the existing version and install the newest version with the same steps.
 
 </details>
 
