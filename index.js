@@ -1,36 +1,48 @@
-// Global variables used for popup
-let pageInfo;
-let pageType;
-let tabId;
+let button = document.querySelector("#register-button");
+let select = document.querySelector("#option-select");
+let task2 = document.querySelector("#task2");
+let task3 = document.querySelector("#task3");
 
-// Registration tasks are handled in registrationTasks.js
-initTaskRemovalTimeouts();
+document.addEventListener("keydown", function (event) {
+	if (event.key === "1") {
+		// Before starting a registration, green button with "LVA-Anmeldung" selected
+		task2.hidden = true;
+		task3.hidden = true;
 
-// Check if tab is a registration page
-chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
-	tabId = tabs[0].id;
-	let tabUrl = tabs[0].url;
-	if (!/https:\/\/tiss.tuwien.ac.at\/education\/course\/(courseRegistration|groupList|examDateList)/.test(tabUrl)) return;
+		button.disabled = false;
+		let option = document.createElement("option");
+		option.value = "lva";
+		option.text = "LVA-Anmeldung";
+		select.appendChild(option);
+		select.disabled = false;
+		select.selectedIndex = 1;
+	} else if (event.key === "2") {
+		// After a registration has been queued, button and select disabled
 
-	// Determine type of registration
-	if (/courseRegistration/.test(tabUrl)) pageType = "lva";
-	else if (/groupList/.test(tabUrl)) pageType = "group";
-	else if (/examDate/.test(tabUrl)) pageType = "exam";
+		task2.hidden = false;
+		task3.hidden = true;
 
-	// Switch the info text from "wrong url" to "loading"
-	document.getElementById("info-wrong-url").hidden = true;
-	document.getElementById("info-page-load").hidden = false;
+		button.disabled = true;
+		select.disabled = true;
 
-	// Get the page info from the content script
-	// This is necessary because the popup can be opened before the content script has loaded
-	while (!pageInfo) {
-		// Catch empty because it just means the tab hasn't loaded yet
-		pageInfo = await chrome.tabs.sendMessage(tabId, { action: "getPageInfo" }).catch(() => {});
+		select.querySelectorAll("option").forEach((option) => {
+			if (option.value !== "default") {
+				option.remove();
+			}
+		});
+	} else if (event.key === "3") {
+		// After a registration has been completed, button and select disabled
+
+		task2.hidden = true;
+		task3.hidden = false;
+
+		button.disabled = true;
+		select.disabled = true;
+
+		select.querySelectorAll("option").forEach((option) => {
+			if (option.value !== "default") {
+				option.remove();
+			}
+		});
 	}
-
-	// Hide loading text
-	document.getElementById("info-page-load").hidden = true;
-
-	// Option selector is handled in optionSelector.js
-	initOptionSelector();
 });

@@ -13,33 +13,9 @@
 				<h1>Lightning Registrator</h1>
 			</header>
 
-			<section name="info">
-				<p hidden class="info-text warning" id="info-time-difference">
-					Your computer's time differs considerably from the server's time. This won't affect the registration, however consider synchronizing your clock in the settings.
-				</p>
-				<p class="info-text info" id="info-wrong-url">
-					Navigate to any LVA/group/exam registration page on
-					<a target="_blank" href="https://tiss.tuwien.ac.at/education/favorites.xhtml">TISS</a>
-					to start a registration.
-				</p>
-				<p hidden class="info-text info" id="info-page-load">Waiting for the page to load...</p>
-				<p hidden class="info-text info" id="info-active-registration">
-					Registrations run in the background, you can change tabs/windows. Closing or updating this tab will cancel the registration. To start another registration, open
-					a new tab.
-				</p>
-				<p hidden class="info-text info" id="info-no-options">There are no registration options on this page that open soon.</p>
-				<p hidden class="info-text warning" id="info-multiple-tasks">
-					Try to avoid starting multiple registrations that open at the same time, as it may impact the performance of the extension.
-				</p>
-				<p hidden class="info-text warning" id="info-long-wait">
-					This registration option will only open after a while. The extension will keep you logged in until the registration starts, however it is essential that your
-					computer doesn't go to sleep until the registration starts.
-				</p>
-			</section>
-
-			<section hidden name="register">
+			<section name="register">
 				<select disabled id="option-select">
-					<option selected hidden value="">Select a registration option</option>
+					<option selected hidden value="default">Select a registration option</option>
 				</select>
 
 				<select hidden id="slot-select"></select>
@@ -50,6 +26,18 @@
 			<section name="tasks">
 				<h2>Active Registrations</h2>
 				<div id="task-info">No active registrations</div>
+
+				<div hidden class="task" id="task2">
+					<h3>Queued <span>Starting in 3m 27s</span></h3>
+					<div class="task-content">Algebra und Diskrete Mathematik für InformatikerInnen</div>
+					<div class="task-content">G2 (11:00-13:00, HS 14)</div>
+				</div>
+
+				<div hidden class="task success" id="task3">
+					<h3>Success <span>412ms | Number 1 (or lower)</span></h3>
+					<div class="task-content">Computergraphik</div>
+					<div class="task-content">Mündliche Prüfung (9:40 - 9:55, 04.10.2023)</div>
+				</div>
 			</section>
 
 			<footer>
@@ -57,14 +45,10 @@
 				<a target="_blank" href="https://github.com/The-breakbar/TISS-Lightning-Registrator">
 					<img class="github-icon" src="images/github_logo.png" alt="GitHub" />
 				</a>
-				<div class="version">v1.1.0</div>
+				<div class="version">v1.2.0</div>
 			</footer>
 		</main>
 
-		<script src="popup-scripts/optionSelector.js"></script>
-		<script src="popup-scripts/popupComponents.js"></script>
-		<script src="popup-scripts/registerButton.js"></script>
-		<script src="popup-scripts/registrationTasks.js"></script>
 		<script src="index.js"></script>
 	</body>
 </html>

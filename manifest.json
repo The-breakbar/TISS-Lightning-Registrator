@@ -1,40 +1,12 @@
 {
-	"name": "TISS Lightning Registrator",
-	"description": "Register automatically for courses, groups or exams in TISS as soon as they open.",
-	"version": "1.1.0",
+	"name": "TISS Lightning Registrator Screenshots",
+	"description": "TEST VERSION FOR SCREENSHOTS - Press 1/2/3 in popup to show preconfigured displays.",
+	"version": "1.0.0",
 	"manifest_version": 3,
 	"action": {
 		"default_popup": "./popup.html"
 	},
-	"content_scripts": [
-		{
-			"matches": [
-			  "https://tiss.tuwien.ac.at/education/course/courseRegistration*",
-			  "https://tiss.tuwien.ac.at/education/course/groupList*",
-			  "https://tiss.tuwien.ac.at/education/course/examDateList*"
-			],
-			"js": [
-				"./content-scripts/getPageInfo.js",
-				"./content-scripts/infoMessage.js",
-				"./content-scripts/sendRegistration.js",
-				"./content-scripts/resultHandler.js"
-			],
-			"css": [
-				"./content-scripts/infoMessageStyle.css"
-			]
-		}
-	],
-	"background": {
-		"service_worker": "./background.js"
-	},
-	"permissions": [
-		"tabs",
-		"storage"
-	],
 	"icons": {
-		"16": "./images/icon16.png",
-		"32": "./images/icon32.png",
-		"48": "./images/icon48.png",
 		"128": "./images/icon128.png"
 	}
 }
