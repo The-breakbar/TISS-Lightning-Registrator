@@ -23,7 +23,7 @@ Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning
 
 ### Chrome / Opera / Edge
 
-1. Download the zip of the latest unpacked release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and extract it (or clone the repo).
+1. Download the zip of the latest `Unpacked` release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and extract it (or clone the repo).
 2. Navigate to the browser page of your installed extensions. It can be found under "Manage extensions" in your browser options or by going to the following links depending on your browser:
 
    - Chrome: `chrome://extensions`
@@ -37,7 +37,7 @@ Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning
 
 Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted.
 
-1. Download the zip of the latest unpacked Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it (or clone the repo).
+1. Download the zip of the latest `Unpacked` Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it (or clone the repo).
 2. Navigate to `about:debugging#/runtime/this-firefox`.
 3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
 
