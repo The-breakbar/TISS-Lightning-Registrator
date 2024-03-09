@@ -266,7 +266,7 @@ let sendRequest = async (viewState, buttonId, slot) => {
 	if (slot) {
 		let slotOptions = pageDocument.querySelectorAll(`select[id="regForm:subgrouplist"] option`);
 		let option = Array.from(slotOptions).find((option) => option.textContent.includes(slot[0]) && option.textContent.includes(slot[1]));
-		bodyData["regForm:subgrouplist"] = option.value;
+		secondBody["regForm:subgrouplist"] = option.value;
 	}
 
 	// Update the body with the new data and encode it
