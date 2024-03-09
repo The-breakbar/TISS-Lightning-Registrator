@@ -19,6 +19,15 @@
 							"strict_min_version": "109.0"
 						}
 					}
+				},
+				{
+					"version": "1.2.1",
+					"update_link": "https://github.com/The-breakbar/TISS-Lightning-Registrator/releases/download/v1.2.1/TISS-Lightning-Registrator-1.2.1-Firefox.xpi",
+					"applications": {
+						"gecko": {
+							"strict_min_version": "109.0"
+						}
+					}
 				}
 			]
 		}
