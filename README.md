@@ -12,7 +12,7 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 
 ### Firefox
 
-Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and download the latest `TISS-Lightning-Registrator-<version>-Firefox.xpi` file (note the `.xpi` file extension). The browser will prompt you to install the extension, if not, drag the downloaded file into the browser.
+Navigate to the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and download the latest `TISS-Lightning-Registrator-<version>-Firefox.xpi` file (note the `.xpi` file extension) to install the extension. **You will receive automatic updates and don't have to manually install new versions.**
 
 ### Manual installation
 
