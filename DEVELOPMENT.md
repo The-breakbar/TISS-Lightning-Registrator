@@ -174,7 +174,7 @@ With this, the registration process is complete and the extension can register f
 
 ## Results
 
-During regular conditions, the extension can register in less than a second, with the fastest times being around 250ms. Note that this includes the time needed for the first refresh. Depending on how you interpret "registration duration", this can be included or not. The time that the extension shows when a registration succeeds does not include it (it is supposed to represent the time the extension took, to do the same thing the user would have had to do). The timeline looks like this:
+During regular conditions, the extension can register in less than a second, while in isolated testing it can go as low as around 150ms. Note that this includes the time needed for the first refresh. Depending on how you interpret "registration duration", this can be included or not. The time that the extension shows when a registration succeeds does not include it (it is supposed to represent the time the extension took, to do the same thing the user would have had to do). The timeline looks like this:
 
 0. Refresh loop, usually with a frequency of 100-300ms per refresh
 1. (At this point, the registration has opened) Refresh the page (100-300ms) (depending on the frequency of the refresh loop, this might already be delayed, as the registration might open while the previous request is still being processed)
