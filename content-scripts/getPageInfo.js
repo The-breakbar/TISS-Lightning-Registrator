@@ -82,7 +82,7 @@ let gatherPageInfo = () => {
 		let optionInfo = {};
 
 		// Check if the register button is available
-		optionInfo.available = ["Register", "Anmelden"].includes(element.querySelector(`input[type="submit"]`)?.value);
+		optionInfo.available = ["Register", "Anmelden", "Voranmeldung", "Preregistration"].includes(element.querySelector(`input[type="submit"]`)?.value);
 
 		// Check if the option is already registered
 		optionInfo.registered = ["Deregistration", "Abmelden"].includes(element.querySelector(`input[type="submit"]`)?.value);

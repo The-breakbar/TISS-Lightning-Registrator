@@ -5,6 +5,9 @@ const TIME_DEVIATION_MAX = 30000; // 30 seconds
 const TASK_EXPIRY = 120000; // 2 minutes
 let registerButton = document.getElementById("register-button");
 
+const controller = new AbortController();
+const MAX_TIME_API_WAIT_TIME = 1000; // 1 second
+
 // Listener for the option select, it enables the register button if all conditions are met
 document.getElementById("option-select").addEventListener("change", () => {
 	let optionId = document.getElementById("option-select").value;
@@ -57,8 +60,13 @@ registerButton.addEventListener("click", async () => {
 	// This is not a perfect solution, if the request fails, then the time is not checked
 	// However this should only happen very rarely, as most system clocks don't deviate that much
 	let timeOverride;
-	const timeResponse = await fetch("https://worldtimeapi.org/api/timezone/Europe/Vienna");
-	if (timeResponse.ok) {
+	setTimeout(() => controller.abort(), MAX_TIME_API_WAIT_TIME); // abort the request if it takes too long/is rate limited
+	const timeResponse = await fetch("https://worldtimeapi.org/api/timezone/Europe/Vienna", { signal: controller.signal }).catch((error) => {
+		if (error.name === "AbortError") console.log("Time API request aborted for taking too long");
+		else console.error("Time API request failed", error);
+	});
+
+	if (timeResponse?.ok) {
 		// If response is fine, extract the timestamp
 		const data = await timeResponse.json();
 		let serverTime = data.unixtime * 1000; // The serverTime is received in seconds

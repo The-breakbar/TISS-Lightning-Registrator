@@ -89,7 +89,7 @@ let handleResult = async (message) => {
 		expiry: Date.now() + TASK_EXPIRY,
 		number,
 		time,
-		error: errorMessage
+		error: success ? null : errorMessage
 	};
 	updateTask(tabId, update);
 };
