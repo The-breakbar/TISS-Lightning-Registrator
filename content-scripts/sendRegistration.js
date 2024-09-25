@@ -106,7 +106,7 @@ let refreshLoop = async (optionId, slot) => {
 		let button = getButtonFromPage(pageDocument, optionId);
 
 		if (button) {
-			viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+			viewState = pageDocument.querySelector(`input[name="jakarta.faces.ViewState"]`).value;
 			buttonId = button.id;
 		}
 	}
@@ -181,7 +181,7 @@ let registerLoop = async (firstViewState, buttonId, optionId, slot) => {
 				}
 
 				// Otherwise just get the ViewState and continue
-				viewState = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+				viewState = pageDocument.querySelector(`input[name="jakarta.faces.ViewState"]`).value;
 			}
 
 			// Throws an error here if the request fails in any way
@@ -222,9 +222,8 @@ const CONFIRM_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/register.xh
 let sendRequest = async (viewState, buttonId, slot) => {
 	// Define the request body
 	let bodyData = {
-		dspwid: windowId,
-		"javax.faces.ClientWindow": windowId,
-		"javax.faces.ViewState": viewState
+		"jakarta.faces.ClientWindow": windowId,
+		"jakarta.faces.ViewState": viewState
 	};
 
 	// Create the body together with the additional required data and define endpoint
@@ -258,7 +257,7 @@ let sendRequest = async (viewState, buttonId, slot) => {
 
 	// Get the new ViewState and button id from the response and add it to the payload
 	let secondBody = { ...bodyData, regForm_SUBMIT: "1" };
-	secondBody["javax.faces.ViewState"] = pageDocument.querySelector(`input[name="javax.faces.ViewState"]`).value;
+	secondBody["jakarta.faces.ViewState"] = pageDocument.querySelector(`input[name="jakarta.faces.ViewState"]`).value;
 	let confirmButton = pageDocument.querySelector(`#contentInner #regForm input`);
 	secondBody[confirmButton.id] = "Register";
 
