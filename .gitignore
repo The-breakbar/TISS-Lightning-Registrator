@@ -1,3 +1,4 @@
 *.psd
 /releases
 /misc
+.vscode/launch.json

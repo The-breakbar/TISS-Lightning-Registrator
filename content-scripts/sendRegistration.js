@@ -55,7 +55,7 @@ client.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// This will start the refresh loop, which will then start the register loop
 	tabId = message.tabId;
-	let { timestamp, optionId, slot, timeOverride } = message;
+	let { timestamp, optionId, slot, timeOverride, studyCode } = message;
 	let currentTime = timeOverride || Date.now();
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 
@@ -74,7 +74,7 @@ client.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		clearInterval(sessionRefresh);
 
 		// Start the refresh loop
-		refreshLoop(optionId, slot);
+		refreshLoop(optionId, slot, studyCode);
 	}, remainingTime);
 
 	// Close the message connection
@@ -95,7 +95,7 @@ let getButtonFromPage = (page, optionId) => {
 
 // Continously refresh the page until the register button is found, then get the ViewState and start the registration loop
 // Requests are sent in series at, if the button is not found after the specified time, the loop will stop
-let refreshLoop = async (optionId, slot) => {
+let refreshLoop = async (optionId, slot, studyCode) => {
 	let stopTime = Date.now() + START_OFFSET + STOP_OFFSET;
 	let viewState, buttonId;
 
@@ -122,7 +122,7 @@ let refreshLoop = async (optionId, slot) => {
 	}
 
 	// Start the registration loop
-	registerLoop(viewState, buttonId, optionId, slot);
+	registerLoop(viewState, buttonId, optionId, slot, studyCode);
 };
 
 // Updates the status of the registration task
@@ -146,7 +146,7 @@ let updateTaskToRunning = async () => {
 // - While sending many requests at once, it has been observed that the response is an error, even if the registration was successfully processed internally
 //   All the following requests will then get a response which says they're already registered, which causes issues for the result handler
 // The observed issues are not fully understood, so it could be considered to change this to a parallel request loop in the future, if it's faster
-let registerLoop = async (firstViewState, buttonId, optionId, slot) => {
+let registerLoop = async (firstViewState, buttonId, optionId, slot, studyCode) => {
 	logExactTime("Valid ViewState obtained, starting register loop...");
 
 	// Update the status of the registration task
@@ -185,7 +185,7 @@ let registerLoop = async (firstViewState, buttonId, optionId, slot) => {
 			}
 
 			// Throws an error here if the request fails in any way
-			response = await sendRequest(viewState, buttonId, slot);
+			response = await sendRequest(viewState, buttonId, slot, studyCode);
 
 			// Reaching this point means the request succeeded
 			// (Note that this doesn't mean the registration was successful, as the response has to be checked)
@@ -219,12 +219,17 @@ const CONFIRM_ENDPOINT = "https://tiss.tuwien.ac.at/education/course/register.xh
 
 // This function attempts to send the two POST requests required to register and returns a promise of the body of the second request
 // If any of the requests fail, it will throw an error (caused by the validateResponse function)
-let sendRequest = async (viewState, buttonId, slot) => {
+let sendRequest = async (viewState, buttonId, slot, studyCode) => {
 	// Define the request body
 	let bodyData = {
 		"jakarta.faces.ClientWindow": windowId,
 		"jakarta.faces.ViewState": viewState
 	};
+
+	// Handle mutiple multiple studycodes
+	if (true) {
+		bodyData = {...bodyData, "regForm:studyCode": studyCode }
+	}
 
 	// Create the body together with the additional required data and define endpoint
 	let targetUrl, firstBody;
