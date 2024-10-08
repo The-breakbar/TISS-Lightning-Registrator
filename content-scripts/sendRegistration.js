@@ -227,7 +227,7 @@ let sendRequest = async (viewState, buttonId, slot, studyCode) => {
 	};
 
 	// Handle mutiple multiple studycodes
-	if (true) {
+	if (studyCode) {
 		bodyData = {...bodyData, "regForm:studyCode": studyCode }
 	}
 
