@@ -39,12 +39,14 @@ main {
 
 /* Set transitions for hover effects and button clicks */
 select,
-button {
+button,
+input {
 	transition: filter ease-in-out 0.2s, border-radius ease-in-out 0.2s, transform ease-in-out 0.15s;
 }
 
 select:hover,
-button:hover {
+button:hover,
+input:hover {
 	filter: brightness(1.1);
 }
 
@@ -117,6 +119,13 @@ section[name="register"] select {
 
 section[name="register"] select:enabled:hover {
 	border-radius: 15px;
+}
+
+/* Study Code input */
+section[name="studyCode"] {
+	width: 100%;
+	margin: 0;
+	padding: 0px 12px 0px 12px;
 }
 
 /* Register button */

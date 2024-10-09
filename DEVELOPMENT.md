@@ -264,6 +264,7 @@ The request body needs to contain the following key-value pairs:
 | `jakarta.faces.ClientWindow`      | A window id       | The id is found in the url as the "dswid" parameter                                                                                                                                                                                                                             |
 | `jakarta.faces.ViewState`         | A valid ViewState | See [ViewState](#viewstate)                                                                                                                                                                                                                                                     |
 | `regForm:subgrouplist` (Optional) | Slot value        | **Only needed if registering for exam with slots**<br />The confirmation page contains a dropdown menu (`<select>`) with the available slots to choose from<br />The value is the value attribute of the option (e.g. `<option value="138848">`) of the slot you want to choose |
+| `regForm:studyCode` (Optional)    | Study code        | **Only needed if account has to select study code during a registration**<br />This is for those who are enrolled into multiple curricula. The value is the 6-digit study code (e.g. `033521`)                                                                                  |
 
 ## Example curl commands
 
