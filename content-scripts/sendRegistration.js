@@ -86,10 +86,13 @@ let getButtonFromPage = (page, optionId) => {
 	let options = page.querySelectorAll("#contentInner .groupWrapper");
 	let button;
 	if (pageType == "lva") button = options[0].querySelector(`input[id^="registrationForm"]`);
-	else
+	else {
 		button = Array.from(options)
-			.map((option) => option.querySelector(`input[id*="${optionId}"]`))
+			// See issue #6, the selector is more specific than just id*={optionId} to avoid false positives
+			// There can be the rare case that the selected optionId is included in another id (as a substring), so this accounts for that
+			.map((option) => option.querySelector(`input[id*="Form:${optionId}:j_id_"]`))
 			.find((button) => button);
+	}
 	return button;
 };
 
