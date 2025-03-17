@@ -18,8 +18,8 @@
 // After the registration attempts are done, the result is processed in the resultHandler.js script
 
 // Define general registration parameters
-const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
-const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
+const START_OFFSET = 70000; // How many ms before the timestamp the refresh loop should start
+const STOP_OFFSET = 70000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
@@ -48,15 +48,15 @@ let logExactTime = (...message) => {
 let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
-client.runtime.onMessage.addListener((message, sender, sendResponse) => {
+client.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.action != "sendRegistration") return;
 	logExactTime("Received registration request...");
 
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// This will start the refresh loop, which will then start the register loop
 	tabId = message.tabId;
-	let { timestamp, optionId, slot, timeOverride } = message;
-	let currentTime = timeOverride || Date.now();
+	let { timestamp, optionId, slot } = message;
+	let currentTime = await getSyncedTime(); // From timeSync.js
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 
 	// Refresh the page every 30 minutes to keep the session alive
