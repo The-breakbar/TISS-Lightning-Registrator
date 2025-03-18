@@ -121,13 +121,6 @@ section[name="register"] select:enabled:hover {
 	border-radius: 15px;
 }
 
-/* Study Code input */
-section[name="studyCode"] {
-	width: 100%;
-	margin: 0;
-	padding: 0px 12px 0px 12px;
-}
-
 /* Register button */
 section[name="register"] button {
 	width: 100%;
@@ -273,4 +266,117 @@ img {
 	height: 34px;
 	vertical-align: middle;
 	pointer-events: none;
+}
+
+/* Settings */
+#settings-toggle-stripe {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+#settings-toggle-stripe:hover {
+	text-decoration: underline;
+}
+
+#settings-button {
+	background-color: transparent;
+	color: var(--text-color);
+	opacity: 0.8;
+	width: 100%;
+	border: none;
+	/* border: 1px solid red; */
+	padding: 6px;
+	font-size: 10px;
+	cursor: pointer;
+}
+
+#settings-button:active {
+	transform: none;
+}
+
+#settings-content {
+	display: flex;
+	flex-direction: column;
+}
+
+.settings-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 7px 10px;
+	font-size: 12px;
+}
+
+#study-code-input {
+	width: 90px;
+	background-color: var(--primary);
+	color: var(--text-color);
+	border: 2px solid var(--secondary);
+	border-radius: var(--border-radius);
+	padding: 2px 4px;
+	outline: none;
+	box-shadow: var(--shadow);
+
+	&.correct {
+		border: 2px solid var(--success-border);
+	}
+
+	&.incorrect {
+		border: 2px solid var(--failure-border);
+	}
+}
+
+input::placeholder {
+	color: var(--text-color);
+	opacity: 0.5;
+}
+
+.tooltip {
+	position: relative;
+	display: inline-block;
+	background-color: var(--secondary);
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 16px;
+	margin: 0 4px;
+	box-shadow: var(--shadow);
+}
+
+.tooltip .tooltip-text {
+	visibility: hidden;
+	width: 180px;
+	background-color: var(--primary);
+	color: var(--text-color);
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px;
+	position: absolute;
+	z-index: 10;
+	bottom: 150%;
+	left: 50%;
+	margin-left: -90px;
+	opacity: 0;
+	transition: opacity 0.3s;
+	box-shadow: var(--shadow-strong);
+	font-size: 10px;
+}
+
+.tooltip .tooltip-text::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -10px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: var(--primary) transparent transparent transparent;
+	box-shadow: var(--shadow-strong);
+}
+
+.tooltip:hover .tooltip-text {
+	visibility: visible;
+	opacity: 1;
 }

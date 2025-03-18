@@ -42,7 +42,7 @@ registerButton.addEventListener("click", async () => {
 	}
 
 	// Get the studycode from input field
-	studyCode = document.getElementById("studycode-input").value;
+	studyCode = undefined; //document.getElementById("studycode-input").value;
 
 	// Disable the button and select elements
 	registerButton.disabled = true;

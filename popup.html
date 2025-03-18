@@ -34,14 +34,6 @@
 				</p>
 			</section>
 
-			<section name="studyCode">
-				<p>
-					<input type="checkbox" id="hasStudyCode-input" onchange="">
-					<label for="hasStudyCode-input">Multi-Program Enrollment</label>
-					<input  hidden type="number" id="studycode-input" placeholder="033521">
-				</p>
-			</section>
-
 			<section hidden name="register">
 				<select disabled id="option-select">
 					<option selected hidden value="">Select a registration option</option>
@@ -57,6 +49,28 @@
 				<div id="task-info">No active registrations</div>
 			</section>
 
+			<div name="settings">
+				<div id="settings-toggle-stripe">
+					<button id="settings-button">▼ Show advanced settings</button>
+				</div>
+				<div id="settings-container" hidden>
+					<div id="settings-content">
+						<div class="settings-row">
+							<label for="auto-register"
+								>Study code override
+								<div class="tooltip">
+									?<span class="tooltip-text"
+										>If you are enrolled in multiple study programs, specify your desired study code for the registration. Code should be a 6-digit number (e.g.
+										033521).</span
+									>
+								</div></label
+							>
+							<input type="number" id="study-code-input" placeholder="Enter code" />
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<footer>
 				<div>Created by breakbar</div>
 				<a target="_blank" href="https://github.com/The-breakbar/TISS-Lightning-Registrator">
@@ -71,6 +85,7 @@
 		<script src="popup-scripts/registerButton.js"></script>
 		<script src="popup-scripts/registrationTasks.js"></script>
 		<script src="popup-scripts/studyCodeInput.js"></script>
+		<script src="popup-scripts/settings.js"></script>
 		<script src="index.js"></script>
 	</body>
 </html>
