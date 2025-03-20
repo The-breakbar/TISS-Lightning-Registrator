@@ -16,7 +16,8 @@ let initOptionSelector = async () => {
 	document.querySelector(`section[name="register"]`).hidden = false;
 
 	// Check if there is already an ongoing registration task in this tab
-	let ongoingTask = (await client.storage.local.get(tabId.toString()))[tabId];
+	let currentTasks = (await client.storage.local.get("tasks")).tasks;
+	let ongoingTask = currentTasks[tabId.toString()];
 	let finished = ongoingTask?.status == "success" || ongoingTask?.status == "failure";
 	if (ongoingTask && !finished) {
 		// Return, as this tab shouldn't have any interaction options
@@ -93,14 +94,13 @@ let initOptionSelector = async () => {
 
 // Called when a new option is selected
 // This handled the relevant messages and adds the slots of the option has any
-optionSelect.addEventListener("change", (event) => {
+optionSelect.addEventListener("change", async (event) => {
 	// If there are ongoing tasks, show warning message
-	client.storage.local.get(null).then((allTasks) => {
-		let ongoingTasks = Object.values(allTasks).filter((task) => task.status != "success" && task.status != "failure");
-		if (ongoingTasks.length > 0) {
-			document.getElementById("info-multiple-tasks").hidden = false;
-		}
-	});
+	let currenTasks = (await client.storage.local.get("tasks")).tasks;
+	let ongoingTasks = Object.values(currenTasks).filter((task) => task.status != "success" && task.status != "failure");
+	if (ongoingTasks.length > 0) {
+		document.getElementById("info-multiple-tasks").hidden = false;
+	}
 
 	// Determine the selected option (undefined if it's an lva option)
 	let optionId = event.target.value;

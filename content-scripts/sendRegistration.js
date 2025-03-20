@@ -131,13 +131,15 @@ let refreshLoop = async (optionId, slot, studyCode) => {
 // Updates the status of the registration task
 // This is a possible race condition for a visual bug, however the requests would have to be faster than the updating (which is highly unlikely)
 let updateTaskToRunning = async () => {
-	let task;
+	let task, currentTasks;
 	while (!task) {
-		task = (await client.storage.local.get(tabId.toString()))[tabId];
+		currentTasks = (await client.storage.local.get("tasks")).tasks;
+		task = currentTasks[tabId.toString()];
 	}
 	if (task.status == "queued") {
 		task.status = "running";
-		client.storage.local.set({ [tabId]: task });
+		currentTasks[tabId.toString()] = task;
+		client.storage.local.set({ tasks: currentTasks });
 	}
 };
 
