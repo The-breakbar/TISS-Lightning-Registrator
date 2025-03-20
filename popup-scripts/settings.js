@@ -16,19 +16,31 @@ settingsButton.addEventListener("click", () => {
 
 // Study code input validation
 let studyCodeInput = document.getElementById("study-code-input");
-studyCodeInput.addEventListener("input", () => {
+studyCodeInput.addEventListener("input", async () => {
+	let settings = (await client.storage.local.get("settings")).settings;
+
 	if (!studyCodeInput.value) {
+		settings.studyCode = undefined;
 		studyCodeInput.classList.remove("correct");
 		studyCodeInput.classList.remove("incorrect");
-		return;
-	}
-
-	let valid = studyCodeInput.value.match(/^[0-9]{6}$/);
-	if (valid) {
+	} else if (studyCodeInput.value.match(/^[0-9]{6}$/)) {
+		settings.studyCode = studyCodeInput.value;
 		studyCodeInput.classList.remove("incorrect");
 		studyCodeInput.classList.add("correct");
 	} else {
+		settings.studyCode = undefined;
 		studyCodeInput.classList.remove("correct");
 		studyCodeInput.classList.add("incorrect");
+	}
+
+	// Save the settings
+	await client.storage.local.set({ settings });
+});
+
+// Load settings from local storage
+client.storage.local.get("settings").then((result) => {
+	if (result.settings.studyCode) {
+		studyCodeInput.value = result.settings.studyCode;
+		studyCodeInput.classList.add("correct");
 	}
 });

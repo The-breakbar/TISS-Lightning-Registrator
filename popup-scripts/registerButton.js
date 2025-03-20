@@ -25,7 +25,7 @@ document.getElementById("slot-select").addEventListener("change", () => {
 // Main button callback, it expects that the selected options are valid
 registerButton.addEventListener("click", async () => {
 	// Get the info of the selected options
-	let optionInfo, optionId, slot, studyCode;
+	let optionInfo, optionId, slot;
 	if (pageType == "lva") {
 		optionInfo = pageInfo.options[0]; // If the page is an LVA page, there is only one option
 	} else {
@@ -41,9 +41,6 @@ registerButton.addEventListener("click", async () => {
 		}
 	}
 
-	// Get the studycode from input field
-	studyCode = undefined; //document.getElementById("studycode-input").value;
-
 	// Disable the button and select elements
 	registerButton.disabled = true;
 	document.getElementById("option-select").disabled = true;
@@ -58,8 +55,7 @@ registerButton.addEventListener("click", async () => {
 		tabId,
 		timestamp: optionInfo.start,
 		optionId,
-		slot,
-		studyCode
+		slot
 	});
 
 	// Store the active registration task

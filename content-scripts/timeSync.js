@@ -13,7 +13,7 @@ let getSyncedTime = async () => {
 	setTimeout(() => controller.abort(), MAX_API_WAIT_TIME); // abort the request if it takes too long/is rate limited
 	const timeResponse = await fetch("https://timeapi.io/api/time/current/zone?timeZone=Europe%2FVienna", { signal: controller.signal }).catch((error) => {
 		if (error.name === "AbortError") console.log("Time API request aborted for taking too long");
-		else console.error("Time API request failed", error);
+		else console.log("Time API request failed", error);
 	});
 
 	if (timeResponse?.ok) {
