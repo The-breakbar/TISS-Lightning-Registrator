@@ -20,10 +20,10 @@ let getSyncedTime = async () => {
 		// If response is fine, extract the timestamp
 		const data = await timeResponse.json();
 		let serverTime = new Date(data.dateTime).getTime(); // Convert to timestamp
-		let timeDifference = Math.abs(Date.now() - serverTime);
+		let timeDifference = Date.now() - serverTime;
 		console.log(`Local time: ${new Date(Date.now()).toLocaleString()}\nServer time: ${new Date(serverTime).toLocaleString()}\nDifference: ${timeDifference}ms`);
 
-		if (timeDifference > TIME_DEVIATION_MAX) {
+		if (Math.abs(timeDifference) > TIME_DEVIATION_MAX) {
 			timeOverride = serverTime;
 		}
 	}
