@@ -3,15 +3,17 @@ const TASK_EXPIRY = 60000;
 
 // Helper function to update the task in local storage
 let updateTask = async (tabId, update) => {
-	let task;
+	let task, currentTasks;
 	// Just in case the task is not stored yet
 	// During regular operation it is always stored, but the execution might reach this point before it is added to local storage
 	while (!task) {
-		task = (await client.storage.local.get(tabId.toString()))[tabId];
+		currentTasks = (await client.storage.local.get("tasks")).tasks;
+		task = currentTasks[tabId.toString()];
 	}
 	if (task.status == "queued" || task.status == "running") {
 		task = Object.assign(task, update);
-		client.storage.local.set({ [tabId]: task });
+		currentTasks[tabId.toString()] = task;
+		client.storage.local.set({ tasks: currentTasks });
 	}
 };
 

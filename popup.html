@@ -14,10 +14,6 @@
 			</header>
 
 			<section name="info">
-				<p hidden class="info-text warning" id="info-time-difference">
-					Your computer's time differs considerably from the server's time. This won't affect the registration, however consider synchronizing your clock in your
-					settings.
-				</p>
 				<p class="info-text info" id="info-wrong-url">
 					Navigate to any LVA/group/exam registration page on
 					<a target="_blank" href="https://tiss.tuwien.ac.at/education/favorites.xhtml">TISS</a>
@@ -25,15 +21,14 @@
 				</p>
 				<p hidden class="info-text info" id="info-page-load">Waiting for the page to load...</p>
 				<p hidden class="info-text info" id="info-active-registration">
-					Registrations run in the background, you can change tabs/windows. Closing or refreshing this tab will cancel the registration. To start another registration,
-					open a new tab.
+					Registrations run in the background, you can change tabs/windows. Closing or refreshing this tab will cancel the registration.
 				</p>
 				<p hidden class="info-text info" id="info-no-options">There are no registration options on this page that open soon.</p>
 				<p hidden class="info-text warning" id="info-multiple-tasks">
-					Try to avoid starting multiple registrations that open at the same time, as it may impact the performance of the extension.
+					You should avoid using the extension for two registrations that open simultaneously, as it may worsen the chances of success for both.
 				</p>
 				<p hidden class="info-text warning" id="info-long-wait">
-					This registration option will only open after a while. The extension will keep you logged in until the registration starts. However, it is essential that your
+					This registration option will only open after a while. While the extension will keep you logged in until the registration starts, it is essential that your
 					computer doesn't go to sleep until the registration starts.
 				</p>
 			</section>
@@ -49,16 +44,38 @@
 			</section>
 
 			<section name="tasks">
-				<h2>Active Registrations</h2>
+				<h2>Registrations</h2>
 				<div id="task-info">No active registrations</div>
 			</section>
+
+			<div name="settings">
+				<div id="settings-toggle-stripe">
+					<button id="settings-button">▼ Show advanced settings</button>
+				</div>
+				<div id="settings-container" hidden>
+					<div id="settings-content">
+						<div class="settings-row">
+							<div>
+								Study code override
+								<div class="tooltip">
+									?<span class="tooltip-text"
+										>If you are enrolled in multiple study programs, specify your desired study code for registrations. The code is<br />a 6-digit number (e.g.
+										033521).</span
+									>
+								</div>
+							</div>
+							<input type="number" id="study-code-input" placeholder="Enter code" />
+						</div>
+					</div>
+				</div>
+			</div>
 
 			<footer>
 				<div>Created by breakbar</div>
 				<a target="_blank" href="https://github.com/The-breakbar/TISS-Lightning-Registrator">
 					<img class="github-icon" src="images/github_logo.png" alt="GitHub" />
 				</a>
-				<div class="version">v1.3.0</div>
+				<div class="version">v1.4.0</div>
 			</footer>
 		</main>
 
@@ -66,6 +83,7 @@
 		<script src="popup-scripts/popupComponents.js"></script>
 		<script src="popup-scripts/registerButton.js"></script>
 		<script src="popup-scripts/registrationTasks.js"></script>
+		<script src="popup-scripts/settings.js"></script>
 		<script src="index.js"></script>
 	</body>
 </html>

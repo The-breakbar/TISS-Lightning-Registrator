@@ -25,17 +25,19 @@ let activeTimeouts = {};
 // The timeouts will remove the tasks from local storage when they expire
 // This will cause the popup to update and remove the task from the list
 let initTaskRemovalTimeouts = async () => {
-	let taskList = Object.values(await client.storage.local.get(null));
-	let tasksToRemove = taskList.filter((task) => task.expiry < Date.now()).map((task) => task.tabId.toString());
-
-	// If there are any tasks that have expired, remove them
-	await client.storage.local.remove(tasksToRemove);
+	// Remove expired tasks from local storage
+	let currentTasks = (await client.storage.local.get("tasks")).tasks;
+	Object.keys(currentTasks).forEach((key) => {
+		let task = currentTasks[key];
+		if (task.expiry < Date.now()) {
+			delete currentTasks[key];
+		}
+	});
+	await client.storage.local.set({ tasks: currentTasks });
 
 	// Set up the timeouts for the remaining tasks
-	taskList.forEach((task) => {
-		activeTimeouts[task.tabId] = setTimeout(() => {
-			client.storage.local.remove(task.tabId.toString());
-		}, task.expiry - Date.now());
+	Object.values(currentTasks).forEach((task) => {
+		addTaskTimeout(task);
 	});
 
 	// Redraw the task elements
@@ -47,8 +49,8 @@ let showTaskElements = async () => {
 	let taskOutput = document.querySelector(`section[name="tasks"]`);
 
 	// Get all current tasks
-	let tasks = await client.storage.local.get(null);
-	let taskList = Object.values(tasks).sort((a, b) => a.created - b.created);
+	let currentTasks = (await client.storage.local.get("tasks")).tasks;
+	let taskList = Object.values(currentTasks).sort((a, b) => a.created - b.created);
 
 	// Clear all elements with the task class
 	let taskElements = taskOutput.querySelectorAll(".task");
@@ -60,35 +62,53 @@ let showTaskElements = async () => {
 	});
 };
 
+let addTaskTimeout = async (task) => {
+	// Set the timeout for the task
+	activeTimeouts[task.tabId] = setTimeout(async () => {
+		// Remove the task from local storage
+		let currentTasks = (await client.storage.local.get("tasks")).tasks;
+		delete currentTasks[task.tabId];
+		await client.storage.local.set({ tasks: currentTasks });
+
+		// Remove from timeouts
+		delete activeTimeouts[task.tabId];
+	}, task.expiry - Date.now());
+};
+
 // Bind storage update callback which will be triggered every time a task is added/updated/removed
 // Redraws the task elements and updates the removal timeouts
 client.storage.onChanged.addListener((changes, area) => {
 	if (area != "local") return;
 
+	// If the update is not for tasks, return
+	if (!changes.tasks) return;
+
 	// Redraw the task elements
 	showTaskElements();
 
-	// Check what kind of change was made to each task
-	Object.keys(changes).forEach((key) => {
-		// If a task was removed, clear the timeout
-		if (changes[key].newValue == undefined) {
+	Object.keys(changes.tasks.newValue).forEach((key) => {
+		let task = changes.tasks.newValue[key];
+
+		// Added
+		if (changes.tasks.oldValue == undefined) {
+			addTaskTimeout(task);
+		}
+
+		// Updated
+		else if (changes.tasks.oldValue[key] != undefined) {
+			// If the task was updated, clear the old timeout and set a new one
+			clearTimeout(activeTimeouts[key]);
+			addTaskTimeout(task);
+		}
+	});
+
+	Object.keys(changes.tasks.oldValue).forEach((key) => {
+		let task = changes.tasks.oldValue[key];
+
+		// Removed
+		if (changes.tasks.newValue == undefined) {
 			clearTimeout(activeTimeouts[key]);
 			delete activeTimeouts[key];
-		}
-
-		// If a task was added, set the timeout
-		else if (changes[key].oldValue == undefined) {
-			activeTimeouts[key] = setTimeout(() => {
-				client.storage.local.remove(key);
-			}, changes[key].newValue.expiry - Date.now());
-		}
-
-		// If the expiry of a task was updated, clear the old timeout and set a new one
-		else if (changes[key].newValue.expiry != changes[key].oldValue.expiry) {
-			clearTimeout(activeTimeouts[key]);
-			activeTimeouts[key] = setTimeout(() => {
-				client.storage.local.remove(key);
-			}, changes[key].newValue.expiry - Date.now());
 		}
 	});
 });

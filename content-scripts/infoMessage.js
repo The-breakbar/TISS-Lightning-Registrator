@@ -12,8 +12,8 @@ client.storage.onChanged.addListener((changes, area) => {
 	if (area != "local") return;
 
 	// If the update is for this tab, update the message (tabId is from sendRegistration.js)
-	if (!changes[tabId]?.newValue) return;
-	let task = changes[tabId].newValue;
+	if (!changes.tasks?.newValue?.[tabId]) return;
+	let task = changes.tasks.newValue[tabId];
 
 	// Remove previous element
 	let old = document.getElementById("LightningRegistratorInfoPopup");
@@ -58,6 +58,6 @@ let setCountdown = (element, time) => {
 		element.textContent = `Starting in ${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds}s`;
 		setTimeout(() => setCountdown(element, time), 1000);
 	} else {
-		element.textContent = "Refreshing page...";
+		element.textContent = "Waiting for registration...";
 	}
 };

@@ -1,7 +1,7 @@
 {
 	"name": "TISS Lightning Registrator",
 	"description": "Register automatically for courses, groups or exams in TISS as soon as they open.",
-	"version": "1.3.0",
+	"version": "1.4.0",
 	"manifest_version": 3,
 	"action": {
 		"default_popup": "./popup.html"
@@ -13,7 +13,13 @@
 				"https://tiss.tuwien.ac.at/education/course/groupList*",
 				"https://tiss.tuwien.ac.at/education/course/examDateList*"
 			],
-			"js": ["./content-scripts/getPageInfo.js", "./content-scripts/infoMessage.js", "./content-scripts/sendRegistration.js", "./content-scripts/resultHandler.js"],
+			"js": [
+				"./content-scripts/getPageInfo.js",
+				"./content-scripts/infoMessage.js",
+				"./content-scripts/sendRegistration.js",
+				"./content-scripts/resultHandler.js",
+				"./content-scripts/timeSync.js"
+			],
 			"css": ["./content-scripts/infoMessageStyle.css"]
 		}
 	],

@@ -39,12 +39,14 @@ main {
 
 /* Set transitions for hover effects and button clicks */
 select,
-button {
-	transition: filter ease-in-out 0.2s, border-radius ease-in-out 0.2s, transform ease-in-out 0.15s;
+button,
+input {
+	transition: filter ease-in-out 0.2s, color ease-in-out 0.2s, border-radius ease-in-out 0.2s, transform ease-in-out 0.15s;
 }
 
 select:hover,
-button:hover {
+button:hover,
+input:hover {
 	filter: brightness(1.1);
 }
 
@@ -137,6 +139,7 @@ section[name="register"] select:disabled,
 section[name="register"] button:disabled {
 	cursor: not-allowed;
 	filter: grayscale(1);
+	color: rgba(255, 255, 255, 0.5);
 }
 
 section[name="register"] button:disabled {
@@ -264,4 +267,121 @@ img {
 	height: 34px;
 	vertical-align: middle;
 	pointer-events: none;
+}
+
+/* Settings */
+#settings-toggle-stripe {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+#settings-button:hover {
+	text-decoration: underline !important;
+}
+
+#settings-button {
+	background-color: transparent;
+	color: var(--text-color);
+	opacity: 0.7;
+	border: none;
+	padding: 3px 0 6px 0;
+	font-size: 10px;
+	cursor: pointer;
+}
+
+#settings-container {
+	border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+#settings-button:active {
+	transform: none;
+}
+
+#settings-content {
+	display: flex;
+	flex-direction: column;
+}
+
+.settings-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 7px 10px;
+	font-size: 12px;
+}
+
+#study-code-input {
+	width: 90px;
+	background-color: var(--primary);
+	color: var(--text-color);
+	border: 1px solid var(--secondary);
+	border-radius: var(--border-radius);
+	padding: 2px 4px;
+	outline: none;
+	box-shadow: var(--shadow);
+
+	&.correct {
+		border: 1px solid var(--success-border);
+	}
+
+	&.incorrect {
+		border: 1px solid var(--failure-border);
+	}
+}
+
+input::placeholder {
+	color: var(--text-color);
+	opacity: 0.5;
+}
+
+.tooltip {
+	position: relative;
+	display: inline-block;
+	background-color: var(--secondary);
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 16px;
+	margin: 0 4px;
+	box-shadow: var(--shadow);
+	cursor: help;
+}
+
+.tooltip .tooltip-text {
+	visibility: hidden;
+	width: 180px;
+	background-color: var(--primary);
+	color: var(--text-color);
+	text-align: center;
+	border-radius: 6px;
+	padding: 5px;
+	position: absolute;
+	z-index: 10;
+	bottom: 150%;
+	left: 50%;
+	margin-left: -90px;
+	opacity: 0;
+	transition: opacity 0.3s;
+	box-shadow: var(--shadow-strong);
+	font-size: 10px;
+}
+
+.tooltip .tooltip-text::after {
+	content: "";
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	margin-left: -10px;
+	border-width: 5px;
+	border-style: solid;
+	border-color: var(--primary) transparent transparent transparent;
+	box-shadow: var(--shadow-strong);
+}
+
+.tooltip:hover .tooltip-text {
+	visibility: visible;
+	opacity: 1;
 }

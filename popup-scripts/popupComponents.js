@@ -72,6 +72,6 @@ let setCountdown = (element, time) => {
 		element.textContent = `Starting in ${hours ? `${hours}h ` : ""}${minutes ? `${minutes}m ` : ""}${seconds}s`;
 		setTimeout(() => setCountdown(element, time), 1000);
 	} else {
-		element.textContent = "refreshing page...";
+		element.textContent = "Waiting for registration...";
 	}
 };

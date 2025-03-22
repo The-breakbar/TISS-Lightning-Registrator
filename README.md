@@ -13,7 +13,7 @@ TISS Lightning Registrator is a browser extension that takes the hassle out of T
 ### Firefox
 
 > [!NOTE]
-> The firefox version is signed and behaves exactly the same way as an extension installed from the Firefox Add-ons store. **You will receive automatic updates and don't have to manually install new versions.** The extension was unfortunately rejected from the store due to the limited audience it serves.
+> The firefox version is verified and behaves exactly the same way as an extension installed from the Firefox Add-ons store. **You will receive automatic updates and don't have to manually install new versions.** The extension was unfortunately rejected from the store due to the limited audience it serves.
 
 Navigate to the [latest release](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases/latest) and download the `TISS-Lightning-Registrator-<version>-Firefox.xpi` file (note the `.xpi` file extension) to install the extension.
 
@@ -40,7 +40,7 @@ Navigate to the [latest release](https://github.com/The-breakbar/TISS-Lightning-
 
 Due to the manual installation process, Firefox unfortunately requires the extension to be reinstalled every time the browser is restarted.
 
-1. Download the zip of the latest `Unpacked` Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it (or clone the repo).
+1. Download the zip of the latest `Unpacked` Firefox release from the GitHub [releases](https://github.com/The-breakbar/TISS-Lightning-Registrator/releases) and unpack it. Alternatively, clone the repo, delete `manifest.json` and rename `manifest-firefox.json` to `manifest.json`.
 2. Navigate to `about:debugging#/runtime/this-firefox`.
 3. Click the "Load Temporary Add-on..." button and select the `manifest.json` file in the unpacked folder which you downloaded.
 

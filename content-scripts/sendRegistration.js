@@ -12,14 +12,13 @@
 //  timestamp: Timestamp of when the requests should start sending in milliseconds
 //  optionId: Id of the option, starting from the first "j_id" until the colon and number (e.g. "j_id_52:0:j_id_5d:j_id_5g:0") (only for group and exam)
 //  slot: A two string array containing the slot start and end time (e.g. ["10:00", "10:30"]) (only for exam)
-//  timeOverride: Optional, if the time difference is too big between the user's local time and the time from worldtimeapi.org, this can be used to override the time
 // }
 
 // After the registration attempts are done, the result is processed in the resultHandler.js script
 
 // Define general registration parameters
-const START_OFFSET = 60000; // How many ms before the timestamp the refresh loop should start
-const STOP_OFFSET = 60000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
+const START_OFFSET = 70000; // How many ms before the timestamp the refresh loop should start
+const STOP_OFFSET = 70000; // How many ms after the timestamp the refresh loop should stop (if it hasn't started to registrate by then)
 const MAX_ATTEMPTS = 5; // Maximum number of attempts to try to register (the first attempt is always expected to succeed, others are just incase something unexpected happens)
 
 // Set a cookie for future refresh (GET) requests, to prevent being redirected to the window handler page
@@ -48,15 +47,15 @@ let logExactTime = (...message) => {
 let tabId;
 
 // This is the main callback that is run when the extension initiates the registration
-client.runtime.onMessage.addListener((message, sender, sendResponse) => {
+client.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
 	if (message.action != "sendRegistration") return;
 	logExactTime("Received registration request...");
 
 	// Set a timeout that will run START_OFFSET milliseconds before the registration opens
 	// This will start the refresh loop, which will then start the register loop
 	tabId = message.tabId;
-	let { timestamp, optionId, slot, timeOverride } = message;
-	let currentTime = timeOverride || Date.now();
+	let { timestamp, optionId, slot } = message;
+	let currentTime = await getSyncedTime(); // From timeSync.js
 	let remainingTime = Math.max(0, timestamp - currentTime - START_OFFSET);
 
 	// Refresh the page every 30 minutes to keep the session alive
@@ -86,10 +85,13 @@ let getButtonFromPage = (page, optionId) => {
 	let options = page.querySelectorAll("#contentInner .groupWrapper");
 	let button;
 	if (pageType == "lva") button = options[0].querySelector(`input[id^="registrationForm"]`);
-	else
+	else {
 		button = Array.from(options)
-			.map((option) => option.querySelector(`input[id*="${optionId}"]`))
+			// See issue #6, the selector is more specific than just id*={optionId} to avoid false positives
+			// There can be the rare case that the selected optionId is included in another id (as a substring), so this accounts for that
+			.map((option) => option.querySelector(`input[id*="Form:${optionId}:j_id_"]`))
 			.find((button) => button);
+	}
 	return button;
 };
 
@@ -128,13 +130,15 @@ let refreshLoop = async (optionId, slot) => {
 // Updates the status of the registration task
 // This is a possible race condition for a visual bug, however the requests would have to be faster than the updating (which is highly unlikely)
 let updateTaskToRunning = async () => {
-	let task;
+	let task, currentTasks;
 	while (!task) {
-		task = (await client.storage.local.get(tabId.toString()))[tabId];
+		currentTasks = (await client.storage.local.get("tasks")).tasks;
+		task = currentTasks[tabId.toString()];
 	}
 	if (task.status == "queued") {
 		task.status = "running";
-		client.storage.local.set({ [tabId]: task });
+		currentTasks[tabId.toString()] = task;
+		client.storage.local.set({ tasks: currentTasks });
 	}
 };
 
@@ -266,6 +270,12 @@ let sendRequest = async (viewState, buttonId, slot) => {
 		let slotOptions = pageDocument.querySelectorAll(`select[id="regForm:subgrouplist"] option`);
 		let option = Array.from(slotOptions).find((option) => option.textContent.includes(slot[0]) && option.textContent.includes(slot[1]));
 		secondBody["regForm:subgrouplist"] = option.value;
+	}
+
+	// If there is a study code setting, add it to the payload
+	let settings = (await client.storage.local.get("settings")).settings;
+	if (settings.studyCode) {
+		secondBody["regForm:studyCode"] = settings.studyCode;
 	}
 
 	// Update the body with the new data and encode it

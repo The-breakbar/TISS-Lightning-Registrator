@@ -1,24 +1,34 @@
 const client = typeof browser === "undefined" ? chrome : browser;
 
-// Set access level to allow content scripts to access session storage
-//client.storage.local.setAccessLevel({ accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS" });
+// Local storage schema:
+// {
+// 	"tasks": { *contains all active tasks* },
+// 	"settings": { *contains all settings* }
+// }
+
+// Set default storage values if they don't exist
+client.storage.local.get("tasks").then((result) => {
+	if (!result.tasks) {
+		client.storage.local.set({ tasks: {} });
+	}
+});
+
+client.storage.local.get("settings").then((result) => {
+	if (!result.settings) {
+		client.storage.local.set({ settings: {} });
+	}
+});
 
 // Remove tasks if their tab is closed or updated
 // Success and failed tasks don't need to be removed, as they are already finished and will expire
 let removeTask = async (tabId) => {
-	let task = (await client.storage.local.get(tabId.toString()))[tabId];
+	let currentTasks = (await client.storage.local.get("tasks")).tasks;
+	let task = currentTasks[tabId.toString()];
 	if (task?.status == "success" || task?.status == "failure") return;
-	client.storage.local.remove(tabId.toString());
+	delete currentTasks[tabId.toString()];
+	await client.storage.local.set({ tasks: currentTasks });
 };
 client.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 	if (changeInfo.status == "loading") removeTask(tabId);
 });
 client.tabs.onRemoved.addListener(async (tabId, removeInfo) => removeTask(tabId));
-
-// Remove all tasks when the browser starts (to ignore tasks from previous sessions)
-client.runtime.onStartup.addListener(async () => {
-	let tasks = await client.storage.local.get(null);
-	for (let task in tasks) {
-		client.storage.local.remove(task);
-	}
-});
