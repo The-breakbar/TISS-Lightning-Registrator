@@ -50,7 +50,7 @@ registerButton.addEventListener("click", async () => {
 	document.getElementById("info-active-registration").hidden = false;
 
 	// Send the registration request to the content script
-	await client.tabs.sendMessage(tabId, {
+	client.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
 		timestamp: optionInfo.start,
