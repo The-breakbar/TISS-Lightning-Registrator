@@ -50,7 +50,7 @@ registerButton.addEventListener("click", async () => {
 	document.getElementById("info-active-registration").hidden = false;
 
 	// Send the registration request to the content script
-	await client.tabs.sendMessage(tabId, {
+	client.tabs.sendMessage(tabId, {
 		action: "sendRegistration",
 		tabId,
 		timestamp: optionInfo.start,
@@ -70,5 +70,7 @@ registerButton.addEventListener("click", async () => {
 		slot,
 		expiry: Math.max(Date.now(), optionInfo.start) + TASK_EXPIRY
 	};
-	client.storage.local.set({ [tabId.toString()]: task });
+	let currentTasks = (await client.storage.local.get("tasks")).tasks;
+	currentTasks[tabId.toString()] = task;
+	client.storage.local.set({ tasks: currentTasks });
 });
